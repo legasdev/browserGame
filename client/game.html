@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Игра</title>
+		 <link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<!-- <canvas id="monopoly_game"></canvas>
+		
+		<input id="drawBtn" type="button" value="Draw">
+		<input id="clearBtn" type="button" value="Clear">-->
+		<script>
+			//храним idr
+			
+			function checkIDR() {
+				var idr =  window.location.href;
+				idr = idr.substr(idr.lastIndexOf('=')+1);
+				return idr;
+			}
+	
+			window.onload = function() {
+				var ws;
+				var ctx;
+				var myplayer;
+				var map = {}; //игровая карта
+				var players = {}; //игроки
+				//соединяем
+				function connect() {
+					ws = new WebSocket('ws://127.0.0.1:443');
+					ws.onopen = onopen;
+					ws.onmessage = onmessage;
+					ws.onerror = onerror;
+					ws.onclose = onclose;
+				}
+				
+				//при открытии соединения
+				function onopen() {
+					//пересылаем номер своей комнаты
+				var idr = checkIDR();	ws.send(JSON.stringify({'type':'idr', 'data':idr}));
+				}
+				
+				//при получении данных с сервера
+				function onmessage(evt) {
+					try {
+						var m = JSON.parse(evt.data);
+					} catch(e) {
+						return;
+					}
+					
+					//сортируем полученные данные с сервера
+					switch (m['type']) {
+						case 'players': 
+							players = m['data'];
+							//выбираем себя себя
+							myplayer = players[m['myid']];
+							break;
+						case 'map':
+							map = m['data'];
+							break;
+						case 'idr':
+							console.log(m['data']);
+							break;
+					}
+				}
+				
+				//при ошибке
+				function onerror(e) {
+					if (e) {
+						console.log(e);
+					}
+					connect();
+				}
+				
+				//при закрытии соединения
+				function onclose() {
+					
+				}
+				
+				function draw() {
+					if (!myplayer) {return;}
+					ctx = canvas.getContext('2d');
+					for (var key in players) {
+						var _player = players[key];
+						ctx.beginPath();
+						ctx.arc(_player.x, _player.y, _player.s, 0, Math.PI*2);
+						ctx.fill();
+					}
+				}
+				
+				function tick() {
+					canvas.width = document.documentElement.clientWidth;
+					canvas.height = document.documentElement.clientHeight-4;
+					draw();
+					requestAnimationFrame(tick);
+				}
+				tick();
+				connect();
+			};
+		</script>
+	</body>
+</html>

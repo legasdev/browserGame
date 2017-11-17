@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Список пользователей</title>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="md5.js"></script>
+</head>
+<body>    
+    <!-- Регистраци пользователя -->
+    <h2>Регистрация</h2>
+    <form name="regForm">
+      	<input type="hidden" name="id" value="0" />
+        <div class="form-group">
+            <label for="login">Логин:</label>
+            <input class="form-control" name="login" />
+        </div>
+        <div class="form-group">
+            <label for="pass">Пароль:</label>
+            <input class="form-control" name="pass" />
+        </div>
+        <div class="panel-body">
+            <button type="submit" id="regnow">Зарегистрироваться</button>
+            <button id="clear">Очистить</button>
+        </div>
+	</form>
+   <!-- Обработка -->
+  	<script>
+		 // Регистрация пользователя
+        function CreateUser(userLogin, userPass) {
+			//ajax запрос
+            $.ajax({
+                url: "api/users",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    login: userLogin,
+                    pass: userPass
+                }),
+				//функция при удачной регистрации
+                success: function (answer) {
+                    reset();
+                    console.log(answer);
+                }
+            })
+        }
+		
+		// отправка формы
+        $("form").submit(function (e) {
+            e.preventDefault();
+            var id = this.elements["id"].value;
+            var name = this.elements["login"].value;
+            var pass = md5(this.elements["pass"].value);
+            if (id == 0)
+                CreateUser(name, pass);
+        });
+		
+		// сброс формы
+        function reset() {
+            var form = document.forms["regForm"];
+            form.reset();
+            form.elements["id"].value = 0;
+        }
+		
+		 // сброс значений формы
+        $("#clear").click(function (e) {
+            e.preventDefault();
+			reset();
+        })
+
+	</script>
+
+</body>
+</html>
