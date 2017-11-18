@@ -2,6 +2,7 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var mongoClient = require("mongodb").MongoClient;
 var objectId = require("mongodb").ObjectID;
+var md5 = require("./md5");
 
 // подключенные клиенты
 var clients = {};
@@ -53,12 +54,13 @@ app.get("/api/users", function(req, res){
     });
 });
 
-app.get("/api/users/:login", function(req, res){
+//создание комнаты
+app.get("/api/users/:newroom", function(req, res){
       
-	var _login = req.params.login;
+	var newroom = req.params.newroom;
 	//наичнаем искать в бд USERS по логину
     mongoClient.connect(url, function(err, db){
-        db.collection("users").findOne({login: _login}, function(err, user){
+        db.collection("rooms").findOne({login: newroom}, function(err, user){
              
             if(err) return res.status(400).send();
              
@@ -67,36 +69,74 @@ app.get("/api/users/:login", function(req, res){
         });
     });
 });
- 
+
 //при POST запросе и url=api/users
 //используется для регистрации пользователя
 app.post("/api/users", jsonParser, function (req, res) {
      
     if(!req.body) return res.sendStatus(400);
      
+	var type = req.body.type; //тип запроса
+	// 0 - Регистрация
+	// 1 - Логин
+	// 2 - Создание комнаты
+	var nowData = new Date();
+	nowData /= 1000;
     var userLogin = req.body.login;
     var userPass = req.body.pass;
-    var user = {login: userLogin, pass: userPass};
-     
+    var user = {login: userLogin, pass: userPass, sh: md5(userLogin+nowData.toString())};
+	
     mongoClient.connect(url, function(err, db){
+		if (type == 0) {
 		//после коннекта ищем челика по логину
-		db.collection("users").findOne({login: userLogin}, function(err, _user){
-			if (err) return res.status(400).send();
-            //если человека нет, то user=null
-			if (_user == null) {
-				//если нет, то создаем человека
-				db.collection("users").insertOne(user, function(err, result){
-					if(err) return res.status(400).send();
-				});
-				res.send(true);
-				db.close();
-			}
-			else {
-				//если челик есть, то вернуть false
-				res.send(false);
-				db.close();
-			}
-        });
+			db.collection("users").findOne({login: userLogin}, function(err, _user){
+				if (err) return res.status(400).send();
+				//если человека нет, то user=null
+				if (_user == null) {
+					//если нет, то создаем человека
+					db.collection("users").insertOne(user, function(err, result){
+						if(err) return res.status(400).send();
+					});
+					res.send(true);
+					db.close();
+				}
+				else {
+					//если челик есть, то вернуть false
+					res.send(false);
+					db.close();
+				}
+			});
+		}
+		//логин
+		else if (type == 1) {
+			//ищем человека
+			db.collection("users").findOne({login: userLogin}, function(err, _user){
+				if (err) return res.status(400).send();
+				//если человека нет, то user=null
+				if (_user == null) {
+					//если нет, то false ответ
+					res.send(false);
+					db.close();
+				}
+				else {
+					//если челик есть, то проверить пароли
+					if (user.pass == _user.pass) {
+						//если пароли совпадают, то вернем session hash
+						db.collection("users").findOneAndUpdate(
+							{login: user.login},
+							{$set: {sh: user.sh}}
+						)
+						res.send(user.sh);
+						db.close();
+					}
+					else {
+						//если не совпадают, то false
+						res.send(false);
+						db.close();
+					}
+				}
+			});
+		}
     });
 });
   

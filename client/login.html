@@ -9,9 +9,8 @@
 </head>
 <body>    
     <!-- Регистраци пользователя -->
-    <h2>Регистрация</h2>
-    <form name="regForm">
-      	<input type="hidden" name="id" value="0" />
+    <h2>Вход</h2>
+    <form name="authForm">
         <div class="form-group">
             <label for="login">Логин:</label>
             <input class="form-control" name="login" />
@@ -21,7 +20,7 @@
             <input class="form-control" name="pass" />
         </div>
         <div class="panel-body">
-            <button type="submit" id="regnow">Зарегистрироваться</button>
+            <button type="submit">Войти</button>
             <button id="clear">Очистить</button>
         </div>
 	</form>
@@ -35,31 +34,55 @@
                 contentType: "application/json",
                 method: "POST",
                 data: JSON.stringify({
-					type: 0,
                     login: userLogin,
                     pass: userPass
                 }),
 				//функция при удачной регистрации
                 success: function (answer) {
                     reset();
-					document.location.href = "login.html";
+                    console.log(answer);
                 }
             })
         }
+		
+		//Проверка на входе, при удачном входе вернется true
+		function loginUser(userLogin, userPass) {
+			//создаем ajax запрос
+			$.ajax({
+				url: "api/users", //к юзерам
+				contentType: "application/json",
+				method: "POST",
+				data: JSON.stringify({
+					type: 1,
+					login: userLogin,
+					pass: userPass
+				}),
+				success: function (answer) {
+					reset();
+					console.log(answer);
+					//если удачно, то переходим в комнаты
+					if (answer != false) {
+						sessionStorage.setItem('sh', answer);
+						
+						console.log(sessionStorage.getItem('sh'));
+						document.location.href = "rooms.html";
+					}
+				}
+			})
+		}
 		
 		// отправка формы
         $("form").submit(function (e) {
             e.preventDefault();
             var name = this.elements["login"].value;
             var pass = md5(this.elements["pass"].value);
-            CreateUser(name, pass);
+            loginUser(name, pass);
         });
 		
 		// сброс формы
         function reset() {
-            var form = document.forms["regForm"];
+            var form = document.forms["authForm"];
             form.reset();
-            form.elements["id"].value = 0;
         }
 		
 		 // сброс значений формы
