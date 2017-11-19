@@ -4,17 +4,34 @@
 		<meta charset="utf-8">
 		<title>Создание комнаты</title>
 		 <link rel="stylesheet" href="style.css">
+		 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 	</head>
 	<body>
-		<input id="drawBtn" type="button" onclick="CreateRoom();" value="Create Room">
+		<input id="drawBtn" type="button" onclick="createRoom();" value="Create Room">
 		<!-- <canvas id="monopoly_game"></canvas>
 		<input id="drawBtn" type="button" value="Draw">
 		<input id="clearBtn" type="button" value="Clear">-->
 	</body>
 	<script>
-		function CreateRoom() {
-			var idr = "1";
-			document.location.href = "game.html?idr="+idr;
+		//Проверка на входе, при удачном входе вернется true
+		function createRoom() {
+			//создаем ajax запрос
+			$.ajax({
+				url: "api/users", //к юзерам
+				contentType: "application/json",
+				method: "POST",
+				data: JSON.stringify({
+					type: 2,
+					sh: sessionStorage.getItem("sh")
+				}),
+				success: function (answer) {
+					//если удачно, то переходим в комнату
+					if (answer != false) {
+						
+						document.location.href = "game.html?idr="+answer;
+					}
+				}
+			})
 		}
 	</script>
 </html>

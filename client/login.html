@@ -25,26 +25,7 @@
         </div>
 	</form>
    <!-- Обработка -->
-  	<script>
-		 // Регистрация пользователя
-        function CreateUser(userLogin, userPass) {
-			//ajax запрос
-            $.ajax({
-                url: "api/users",
-                contentType: "application/json",
-                method: "POST",
-                data: JSON.stringify({
-                    login: userLogin,
-                    pass: userPass
-                }),
-				//функция при удачной регистрации
-                success: function (answer) {
-                    reset();
-                    console.log(answer);
-                }
-            })
-        }
-		
+  	<script>		
 		//Проверка на входе, при удачном входе вернется true
 		function loginUser(userLogin, userPass) {
 			//создаем ajax запрос

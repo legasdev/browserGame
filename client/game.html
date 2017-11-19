@@ -51,16 +51,7 @@
 					
 					//сортируем полученные данные с сервера
 					switch (m['type']) {
-						case 'players': 
-							players = m['data'];
-							//выбираем себя себя
-							myplayer = players[m['myid']];
-							break;
-						case 'map':
-							map = m['data'];
-							break;
-						case 'idr':
-							console.log(m['data']);
+						case 'echo':	console.log(m['data']);
 							break;
 					}
 				}
