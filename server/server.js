@@ -48,6 +48,8 @@ app.post("/api/users", jsonParser, function (req, res) {
 	// 0 - Регистрация
 	// 1 - Логин
 	// 2 - Создание комнаты
+	// 3 - Коннект к комнате
+	// 4 - Проверка комнат
 	var nowData = new Date();
 	nowData /= 1000;
     var userLogin = req.body.login;
@@ -113,14 +115,18 @@ app.post("/api/users", jsonParser, function (req, res) {
 			//добавляем с комнату того, кто создал ее
 			console.log(userSh);
 			db.collection("users").findOne({sh: userSh} , function(err, _user){
-				_players[1] = {};
-				_players[1] = _user;
+				_players[1] = {name: _user.login,
+							  sh: _user.sh,
+							  color: "red",
+							  position: 0,
+							  balanse: 15000
+							  };
 
 				//создаем комнату с начальными параметрами
 				_room = {idr: md5(new Date()),
-						maxPlayers: 1,
+						maxPlayers: 2,
 						players: _players,
-						isPlay: true,
+						isPlay: 0,
 						whoPlay: 1
 						};
 
@@ -132,7 +138,28 @@ app.post("/api/users", jsonParser, function (req, res) {
 				res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
 				db.close(); //закрываем коннект
 			});
+		//присоединение к комнате
+		} else if (type == 3) {
+			console.log("add");
+			//ищем человека, который хочет коннекта
+			db.collection("users").findOne({sh: userSh} , function(err, _user) {
+				if(err) return res.status(400).send();
+				//если нашли человеека
+				var _players;
+				//ищем массив с игроками
+			});
+		//запрос на комнаты
+		} else if (type == 4) {
+			var rooms = {};
+			var check = false;
+			//ищем комнаты, которые не играют
+			db.collection("rooms").find({isPlay: 0}).toArray(
+				function(err, _rooms) {
+				res.send(_rooms);
+				db.close();
+			});
 		}
+		
 	});
 });
   
@@ -245,7 +272,7 @@ webSocketServer.on('connection', function(ws) {
 				
 			}
 		});
-	}
+	}	
 });
 
 	

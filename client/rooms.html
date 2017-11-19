@@ -6,13 +6,57 @@
 		 <link rel="stylesheet" href="style.css">
 		 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 	</head>
-	<body>
+	<body id="body">
 		<input id="drawBtn" type="button" onclick="createRoom();" value="Create Room">
 		<!-- <canvas id="monopoly_game"></canvas>
 		<input id="drawBtn" type="button" value="Draw">
 		<input id="clearBtn" type="button" value="Clear">-->
 	</body>
 	<script>
+		//проверка на комнаты, которые активны
+		setInterval(function() {
+			//создаем ajax запрос
+			$.ajax({
+				url: "api/users", //к юзерам
+				contentType: "application/json",
+				method: "POST",
+				data: JSON.stringify({
+					type: 4
+				}),
+				success: function (answer) {
+					//если удачно, то переходим в комнату
+					if (answer != false) {
+						for (var i=0; i<answer.length; i++) {
+							addRoom(answer[i].idr);
+						}
+						//Создаем кнопку коннекта к данной комнате
+						// создание "виртуального образа" кнопки
+						//document.location.href = "game.html?idr="+answer;
+					}
+				}
+			})
+		}, 1000);
+		
+		//добавление html кода при обновлении комнаты
+		function addRoom(_idr) {
+			var elementP = document.getElementsByClassName("connectLink");
+			var check = true;
+			//проверяем все ссылки на коннект с комнатами
+			//если элемент есть, то не рисовать новый
+			for (var i=0; i<elementP.length; i++) {
+				if (elementP[i].getAttribute("data-idr") == _idr){
+					check = false;
+				}
+			}
+			//если нет, то рисуем
+			if (check) {
+				var str = '<div class="navbar navbar-top">\<a class="connectLink" href="game.html?idr='+_idr+'" onclick="attachRoom(\''+_idr.toString()+'\');" data-idr="'+_idr+'">Зайти</a></div>';
+				var div = document.createElement('div');
+				div.innerHTML = str;
+				document.body.appendChild(div);
+			}
+		}
+		
 		//Проверка на входе, при удачном входе вернется true
 		function createRoom() {
 			//создаем ajax запрос
@@ -27,8 +71,32 @@
 				success: function (answer) {
 					//если удачно, то переходим в комнату
 					if (answer != false) {
-						
+						//Создаем кнопку коннекта к данной комнате
+						// создание "виртуального образа" кнопки
 						document.location.href = "game.html?idr="+answer;
+					}
+				}
+			})
+		}
+		
+		//Присоединиться к комнате
+		function attachRoom(_idr) {
+			//создаем ajax запрос
+			console.log(_idr);
+			$.ajax({
+				url: "api/users", //к юзерам
+				contentType: "application/json",
+				method: "POST",
+				data: JSON.stringify({
+					type: 3,
+					sh: sessionStorage.getItem("sh"),
+					idr: _idr
+				}),
+				success: function (answer) {
+					//если удачно, то переходим в комнату
+					if (answer != false) {
+						
+						//document.location.href = "game.html?idr="+answer;
 					}
 				}
 			})
