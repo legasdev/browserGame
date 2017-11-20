@@ -153,59 +153,67 @@ app.post("/api/users", jsonParser, function (req, res) {
 				if(err) return res.status(400).send();
 				//получаем массив игроков
 				//console.log("2");
-				db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
-					//если нашли человеека
-					var _players = _room.players;
-					//создаем человека
-					//ищем количество людей
-					var counter = 0;
-					for (var key in _players) {
-  						counter++;
-					}
-					//
-					//проверяем, есть ли такой человек в списке
-					var checkHuman = false; //предполагаем, что нет
-					for (var i=1; i<=counter; i++) {
-						//если есть совпадение по логину
-						if (_players[i].name == _user.login) {
-							checkHuman = true;
+				//смотрим, играет ли игрок сейчас
+				if (_user.whenPlaing == "*") {
+					db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
+						//если нашли человеека
+						var _players = _room.players;
+						//создаем человека
+						//ищем количество людей
+						var counter = 0;
+						for (var key in _players) {
+							counter++;
 						}
-					}
-					if (!checkHuman) {
-						var color;
-						//смотрим сколько сейчас человек
-						switch (counter) {
-							case 1: color = "blue"; break;
-							case 2: color = "brown"; break;
-							case 3: color = "green"; break;
-							default: color = "orange"; break;
+						//
+						//проверяем, есть ли такой человек в списке
+						var checkHuman = false; //предполагаем, что нет
+						for (var i=1; i<=counter; i++) {
+							//если есть совпадение по логину
+							if (_players[i].name == _user.login) {
+								checkHuman = true;
+							}
 						}
-						//добавляем в конец человека
-						_players[counter+1] = 
-								{name: _user.login,
-								  sh: _user.sh,
-								  color: color,
-								  position: 0,
-								  balanse: 15000,
-								  num: counter+1
-								  };
-						//console.log(_players);
-						//ищем комнату по idr и меняем в ней players
-						db.collection("rooms").findOneAndUpdate(
-									{idr: userIdr},
-									{$set: {players: _players}}, function(err, __room) {
-										//при удачном добавлении вернуть true
-										//и в челике записать, что он играет
-										db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: userIdr}});
-										res.send(userIdr);	//отсылаем ссылку
-										db.close();
-						});
-					//если челик уже есть, возврат false
-					} else {
-						res.send(false);
-						db.close();
-					}
-				});
+						if (!checkHuman) {
+							var color;
+							//смотрим сколько сейчас человек
+							switch (counter) {
+								case 1: color = "blue"; break;
+								case 2: color = "brown"; break;
+								case 3: color = "green"; break;
+								default: color = "orange"; break;
+							}
+							//добавляем в конец человека
+							_players[counter+1] = 
+									{name: _user.login,
+									  sh: _user.sh,
+									  color: color,
+									  position: 0,
+									  balanse: 15000,
+									  num: counter+1
+									  };
+							//console.log(_players);
+							//ищем комнату по idr и меняем в ней players
+							db.collection("rooms").findOneAndUpdate(
+										{idr: userIdr},
+										{$set: {players: _players}}, function(err, __room) {
+											//при удачном добавлении вернуть true
+											//и в челике записать, что он играет
+											db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: userIdr}});
+											res.send(userIdr);	//отсылаем ссылку
+											db.close();
+							});
+
+						//если челик уже есть, возврат false
+						} else {
+							res.send(false);
+							db.close();
+						}
+					});
+				//если он уже играет, то отсылаем false
+				} else {
+					res.send(false);
+					db.close();
+				}
 				//ищем массив с игроками
 			});
 		//запрос на комнаты

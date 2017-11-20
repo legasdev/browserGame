@@ -24,13 +24,29 @@
 					type: 4
 				}),
 				success: function (answer) {
-					//если удачно, то переходим в комнату
 					if (answer != false) {
+						var elementsLink = document.getElementsByClassName("connectLink");
 						for (var i=0; i<answer.length; i++) {
+							//добавдяем комнату
 							addRoom(answer[i].idr);
 						}
+						//удалить ненужные кнопки
+						for (var i=0; i<elementsLink.length; i++) {
+							var check = false; //изначально не найден элемент
+							//идем по всем существующим комнатам
+							for (var j=0; j<answer.length; j++) {
+								if (elementsLink[i].getAttribute("data-idr") == answer[j].idr && !answer[j].isPlay) {
+									check = true; //нашли
+								}
+							}
+							//если совпадений нет, то удалить элемент
+							if (!check) {
+								var elem = document.getElementById("roomLink");
+								elem.parentNode.removeChild(elem);
+							}
+						} 
 						//Создаем кнопку коннекта к данной комнате
-						// создание "виртуального образа" кнопки
+						//создание "виртуального образа" кнопки
 						//document.location.href = "game.html?idr="+answer;
 					}
 				}
@@ -50,7 +66,7 @@
 			}
 			//если нет, то рисуем
 			if (check) {
-				var str = '<div class="navbar navbar-top">\<input type="button" class="connectLink" value="Зайти" onclick="attachRoom(\''+_idr.toString()+'\');" data-idr="'+_idr+'"></input></div>';
+				var str = '<div class="connectLinks">\<input type="button" id="roomLink" class="connectLink" value="Зайти" onclick="attachRoom(\''+_idr.toString()+'\');" data-idr="'+_idr+'"></input></div>';
 				var div = document.createElement('div');
 				div.innerHTML = str;
 				document.body.appendChild(div);
