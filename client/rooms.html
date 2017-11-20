@@ -13,7 +13,81 @@
 		<input id="clearBtn" type="button" value="Clear">-->
 	</body>
 	<script>
+		/*
+				ЗАПУСК СЕРВЕРА НА КЛИЕНТЕ
+		*/
+		window.onload = function() {
+			var ws;
+			//соединяем
+			function connect() {
+				ws = new WebSocket('ws://127.0.0.1:443');
+				ws.onopen = onopen;
+				ws.onmessage = onmessage;
+				ws.onerror = onerror;
+				ws.onclose = onclose;
+			}
+				
+			//при открытии соединения
+			function onopen() {
+				//получаем список комнат
+				//ws.send(JSON.stringify({'type':'getRooms', 'data':idr}));
+				ws.send(JSON.stringify({'type':'connectToRoom', 'data': sh}));
+			}
+				
+			//при получении данных с сервера
+			function onmessage(evt) {
+				try {
+					var m = JSON.parse(evt.data);
+				} catch(e) {
+					return;
+				}
+				
+				//сортируем полученные данные с сервера
+				switch (m['type']) {
+					//пришло обновление комнаты
+					case 'updateRoom':	updateRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
+						break;
+					case 'addRoom': addRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
+						break;
+				}
+			}
+				
+			//при ошибке
+			function onerror(e) {
+				if (e) {
+					console.log(e);
+				}
+				connect();
+			}
+			
+			//при закрытии соединения
+			function onclose() {
+				
+			}
+				
+			connect();
+			
+			//получаем комнаты
+			$.ajax({
+				url: "api/users", //к юзерам
+				contentType: "application/json",
+				method: "POST",
+				data: JSON.stringify({
+					type: 4
+				}),
+				success: function (answer) {
+					if (answer != false) {
+						var elementsLink = document.getElementsByClassName("fullRoom");
+						for (var i=0; i<answer.length; i++) {
+							//добавдяем комнату
+							addRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
+						}
+					}
+				}
+			});
+		};
 		//проверка на комнаты, которые активны
+		/*
 		setInterval(function() {
 			//создаем ajax запрос
 			$.ajax({
@@ -25,36 +99,75 @@
 				}),
 				success: function (answer) {
 					if (answer != false) {
-						var elementsLink = document.getElementsByClassName("connectLink");
+						var elementsLink = document.getElementsByClassName("fullRoom");
 						for (var i=0; i<answer.length; i++) {
 							//добавдяем комнату
-							addRoom(answer[i].idr);
+							addRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
+							//обновляем
+							//updateRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
 						}
 						//удалить ненужные кнопки
+						
 						for (var i=0; i<elementsLink.length; i++) {
 							var check = false; //изначально не найден элемент
 							//идем по всем существующим комнатам
 							for (var j=0; j<answer.length; j++) {
-								if (elementsLink[i].getAttribute("data-idr") == answer[j].idr && !answer[j].isPlay) {
+								if (elementsLink[i].getAttribute("data-idr") == answer[j].idr && answer[j].isPlay == 0) {
 									check = true; //нашли
 								}
 							}
 							//если совпадений нет, то удалить элемент
 							if (!check) {
-								var elem = document.getElementById("roomLink");
-								elem.parentNode.removeChild(elem);
+								//var elem = document.getElementById("roomLink");
+								//elem.parentNode.parentNode.removeChild(elem);
+								elementsLink[i].remove();
 							}
 						} 
 						//Создаем кнопку коннекта к данной комнате
 						//создание "виртуального образа" кнопки
 						//document.location.href = "game.html?idr="+answer;
+					} else {
+						//если комнат нет, то нужно проверить
+						//есть ли нулевая комната
+						var elementsLink = document.getElementsByClassName("fullRoom");
+						//если есть, то удаляем
+						if (elementsLink[0] != undefined) {
+							elementsLink[0].remove();
+						}
+						
 					}
 				}
 			})
 		}, 1000);
+		*/
+		
+		//обновление комнаты
+		function updateRoom(_idr, _maxPlayers, _players) {
+			var elementP = document.getElementsByClassName("connectLink");
+			//беребираем все кнопки для коннекта
+			for (var i=0; i<elementP.length; i++) {
+				//когда нашли
+				if (elementP[i].getAttribute("data-idr") == _idr){
+					//перебираем по всем игрокам из этой комнаты
+					for (var j=1; j<=_maxPlayers; j++) {
+						if (_players[j] != undefined && elementP[i].getAttribute("data-num") == j) {
+							var newDiv = document.createElement('div');
+							newDiv.setAttribute("class", "loginPlayer");
+							//добавили ник челика
+							//elementP[i].innerHTML = str;
+							//elementP[i].parentNode.innerHTML = str;
+							//если игрок в этой кнопке есть, то удаляем
+							newDiv.innerHTML = _players[j].name;
+							elementP[i].parentNode.appendChild(newDiv);
+							elementP[i].remove();
+						}
+					}
+				}
+			}
+		}
 		
 		//добавление html кода при обновлении комнаты
-		function addRoom(_idr) {
+		function addRoom(_idr, _maxPlayers, _players) {
 			var elementP = document.getElementsByClassName("connectLink");
 			var check = true;
 			//проверяем все ссылки на коннект с комнатами
@@ -66,8 +179,18 @@
 			}
 			//если нет, то рисуем
 			if (check) {
-				var str = '<div class="connectLinks">\<input type="button" id="roomLink" class="connectLink" value="Зайти" onclick="attachRoom(\''+_idr.toString()+'\');" data-idr="'+_idr+'"></input></div>';
+				var str = '<hr>';
+				for (var i=1; i<=_maxPlayers; i++) {
+					//если игрок есть, то пишем его логин
+					if (_players[i] != undefined) {
+						str += '<div class="connectLinks"><div class="loginPlayer">'+_players[i].name+'</div></div>'
+					} else {
+					 	str += '<div class="connectLinks">\<input type="button" id="roomLink" class="connectLink" value="Зайти" onclick="attachRoom(\''+_idr.toString()+'\',\''+i+'\');" data-idr="'+_idr+'" data-num="'+i+'"></input></div>';
+					}
+				}
 				var div = document.createElement('div');
+				div.setAttribute("data-idr", _idr);
+				div.setAttribute("class", "fullRoom");
 				div.innerHTML = str;
 				document.body.appendChild(div);
 			}
@@ -89,14 +212,14 @@
 					if (answer != false) {
 						//Создаем кнопку коннекта к данной комнате
 						// создание "виртуального образа" кнопки
-						document.location.href = "game.html?idr="+answer;
+						//document.location.href = "game.html?idr="+answer;
 					}
 				}
 			})
 		}
 		
 		//Присоединиться к комнате
-		function attachRoom(_idr) {
+		function attachRoom(_idr, _num) {
 			//создаем ajax запрос
 			console.log(_idr);
 			$.ajax({
@@ -106,7 +229,8 @@
 				data: JSON.stringify({
 					type: 3,
 					sh: sessionStorage.getItem("sh"),
-					idr: _idr
+					idr: _idr,
+					num: _num
 				}),
 				success: function (answer) {
 					//если удачно, то переходим в комнату

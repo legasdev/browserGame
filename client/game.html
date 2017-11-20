@@ -38,7 +38,8 @@
 				//при открытии соединения
 				function onopen() {
 					//пересылаем номер своей комнаты
-				var idr = checkIDR();	ws.send(JSON.stringify({'type':'idr', 'data':idr}));
+					var idr = checkIDR();	
+					ws.send(JSON.stringify({'type':'idr', 'data':idr}));
 				}
 				
 				//при получении данных с сервера

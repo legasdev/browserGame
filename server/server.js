@@ -8,6 +8,10 @@ var md5 = require("./md5");
 var app = express();
 var jsonParser = bodyParser.json();
 var url = "mongodb://localhost:27017/usersdb";
+
+//функция из севера
+var changeRoomGlobal; //функция изменения комнаты
+var addRoomGlobal; //создание новой комнаты
  
 app.use(express.static('../client'));
 
@@ -56,6 +60,7 @@ app.post("/api/users", jsonParser, function (req, res) {
     var userPass = req.body.pass; //пароль
 	var userSh = req.body.sh; //sh
 	var userIdr = req.body.idr; //idr комнаты
+	var userNum = req.body.num; //num игрока (сам выбрал)
     var user = {login: userLogin,  //логин
 				pass: userPass,   //пароль
 				sh: md5(md5(userLogin)+md5(nowData.toString())),  //сессия
@@ -120,29 +125,33 @@ app.post("/api/users", jsonParser, function (req, res) {
 			//добавляем с комнату того, кто создал ее
 			//console.log(userSh);
 			db.collection("users").findOne({sh: userSh} , function(err, _user){
-				_players[1] = {name: _user.login,
-							  sh: _user.sh,
-							  color: "red",
-							  position: 0,
-							  balanse: 15000,
-							  num: 1
-							  };
+				//проверяем, не играет ли человек
+				if (_user.whenPlaing == "*") {
+					_players[1] = {name: _user.login,
+								  sh: _user.sh,
+								  color: "red",
+								  position: 0,
+								  balanse: 15000,
+								  num: 1
+								  };
 
-				//создаем комнату с начальными параметрами
-				_room = {idr: md5(new Date()),
-						maxPlayers: 2,
-						players: _players,
-						isPlay: 0,
-						whoPlay: 1
-						};
+					//создаем комнату с начальными параметрами
+					_room = {idr: md5(new Date()),
+							maxPlayers: 4,
+							players: _players,
+							isPlay: 0,
+							whoPlay: 1
+							};
 
-				//добавляем комнату в БД
-				db.collection("rooms").insertOne(_room, function(err, result) {
-					if(err) return res.status(400).send();
-				})
-				//в челике записать, что он играет
-				db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
-				res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
+					//добавляем комнату в БД
+					db.collection("rooms").insertOne(_room, function(err, result) {
+						if(err) return res.status(400).send();
+					})
+					//в челике записать, что он играет
+					db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
+					addRoomGlobal(_room);
+					res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
+				}
 				db.close(); //закрываем коннект
 			});
 		//присоединение к комнате
@@ -153,7 +162,8 @@ app.post("/api/users", jsonParser, function (req, res) {
 				if(err) return res.status(400).send();
 				//получаем массив игроков
 				//console.log("2");
-				//смотрим, играет ли игрок сейчас
+				//смотрим, играет ли игрок сейчас 
+				console.log(_user.whenPlaing);
 				if (_user.whenPlaing == "*") {
 					db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
 						//если нашли человеека
@@ -168,9 +178,11 @@ app.post("/api/users", jsonParser, function (req, res) {
 						//проверяем, есть ли такой человек в списке
 						var checkHuman = false; //предполагаем, что нет
 						for (var i=1; i<=counter; i++) {
-							//если есть совпадение по логину
-							if (_players[i].name == _user.login) {
-								checkHuman = true;
+							//если игрок существует, смотрим его логин
+							if (_players[i] != undefined) {
+								if (_players[i].name == _user.login) {
+									checkHuman = true;
+								}
 							}
 						}
 						if (!checkHuman) {
@@ -183,13 +195,13 @@ app.post("/api/users", jsonParser, function (req, res) {
 								default: color = "orange"; break;
 							}
 							//добавляем в конец человека
-							_players[counter+1] = 
+							_players[userNum] = 
 									{name: _user.login,
 									  sh: _user.sh,
 									  color: color,
 									  position: 0,
 									  balanse: 15000,
-									  num: counter+1
+									  num: userNum
 									  };
 							//console.log(_players);
 							//ищем комнату по idr и меняем в ней players
@@ -200,9 +212,14 @@ app.post("/api/users", jsonParser, function (req, res) {
 											//и в челике записать, что он играет
 											db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: userIdr}});
 											res.send(userIdr);	//отсылаем ссылку
+											//отправляем всем клиентам измененые данные
+											db.collection("rooms").findOne({idr: userIdr}, function(err, _room){
+												changeRoomGlobal(_room);
+											});
 											db.close();
 							});
-
+							
+							
 						//если челик уже есть, возврат false
 						} else {
 							res.send(false);
@@ -221,7 +238,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 			var rooms = {};
 			var check = false;
 			//ищем комнаты, которые не играют
-			db.collection("rooms").find({isPlay: 0}).toArray(
+			db.collection("rooms").find({}).toArray(
 				function(err, _rooms) {
 				res.send(_rooms);
 				db.close();
@@ -293,6 +310,8 @@ function rand(min, max)
 //веб сервер
 var WebSocketServer = new require('ws');
 
+var peers = []; //ссылки на клиенты
+
 // WebSocket-сервер на порту 443
 var webSocketServer = new WebSocketServer.Server({
   port: 443
@@ -307,6 +326,7 @@ webSocketServer.on('connection', function(ws) {
 			ws.send(JSON.stringify({'type':'players', 'data':players, 'myid':id}));
 		}
 	}, 10);*/
+	//peers[peers.length] = ws; //добавляем ссылку при коннекте
 
 	//получаем данные
 	ws.on('message', function(message) {
@@ -316,13 +336,39 @@ webSocketServer.on('connection', function(ws) {
 			case 'idr':
 				echos(m['data']); //отвечаем
 				break;
+			case 'connectToRoom':
+				peers.push(ws); //добавляем ссылку при коннекте
+				mongoClient.connect(url, function(err, db){
+					//обновляем ws клиента
+					db.collection("users").findOneAndUpdate({sh: m['data']}, {$set: {_ws: ws}});
+					db.close();
+				});
+				break;
 		}
 	 });
 
 	//закрываем моединение
 	ws.on('close', function() {
-		//clearInterval(interval);
+		peers.splice(peers.indexOf(ws), 1);
+		console.log("Закрыто соединение 2");
 	});
+	
+	/*
+		ИЗМЕНЕНИЕ КОМНАТЫ
+	*/
+	changeRoomGlobal = function changeRoom(_room) {
+		//отправляем комнату
+		peers.forEach(function(ws){
+			ws.send(JSON.stringify({'type':'updateRoom', 'data':_room}));
+		});
+	}
+	
+	addRoomGlobal = function addRoom(_room) {
+		//отправляем комнату
+		peers.forEach(function(ws){
+			ws.send(JSON.stringify({'type':'addRoom', 'data':_room}));
+		});
+	}
 	
 	/* 
 		Функция ответчик комнаты и соединения
@@ -332,31 +378,10 @@ webSocketServer.on('connection', function(ws) {
 		//Коннектимся с БД
 		mongoClient.connect(url, function(err, db){
 			//отправляем данные по полученному idr
-			if (ws && ws.readyState == 1) {
 				db.collection("rooms").findOne({idr: _idr}, function(err, _obj){
 					ws.send(JSON.stringify({'type':'echo', 'data':_obj.idr}));
 					db.close();
 				});
-				
-			}
 		});
 	}	
 });
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
