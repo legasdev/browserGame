@@ -52,10 +52,15 @@ app.post("/api/users", jsonParser, function (req, res) {
 	// 4 - Проверка комнат
 	var nowData = new Date();
 	nowData /= 1000;
-    var userLogin = req.body.login;
-    var userPass = req.body.pass;
-	var userSh = req.body.sh;
-    var user = {login: userLogin, pass: userPass, sh: md5(md5(userLogin)+md5(nowData.toString()))};
+    var userLogin = req.body.login; //пользовательский логин
+    var userPass = req.body.pass; //пароль
+	var userSh = req.body.sh; //sh
+	var userIdr = req.body.idr; //idr комнаты
+    var user = {login: userLogin,  //логин
+				pass: userPass,   //пароль
+				sh: md5(md5(userLogin)+md5(nowData.toString())),  //сессия
+				whenPlaing: "*" //где сейчас играет, если не *, то играет
+			   };
 	
     mongoClient.connect(url, function(err, db){
 		if (type == 0) {
@@ -113,13 +118,14 @@ app.post("/api/users", jsonParser, function (req, res) {
 			var _players = {};
 			var _room;
 			//добавляем с комнату того, кто создал ее
-			console.log(userSh);
+			//console.log(userSh);
 			db.collection("users").findOne({sh: userSh} , function(err, _user){
 				_players[1] = {name: _user.login,
 							  sh: _user.sh,
 							  color: "red",
 							  position: 0,
-							  balanse: 15000
+							  balanse: 15000,
+							  num: 1
 							  };
 
 				//создаем комнату с начальными параметрами
@@ -134,18 +140,72 @@ app.post("/api/users", jsonParser, function (req, res) {
 				db.collection("rooms").insertOne(_room, function(err, result) {
 					if(err) return res.status(400).send();
 				})
-				console.log(_room);
+				//в челике записать, что он играет
+				db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
 				res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
 				db.close(); //закрываем коннект
 			});
 		//присоединение к комнате
 		} else if (type == 3) {
-			console.log("add");
+			//console.log("1");
 			//ищем человека, который хочет коннекта
-			db.collection("users").findOne({sh: userSh} , function(err, _user) {
+			db.collection("users").findOne({sh: userSh}, function(err, _user) {
 				if(err) return res.status(400).send();
-				//если нашли человеека
-				var _players;
+				//получаем массив игроков
+				//console.log("2");
+				db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
+					//если нашли человеека
+					var _players = _room.players;
+					//создаем человека
+					//ищем количество людей
+					var counter = 0;
+					for (var key in _players) {
+  						counter++;
+					}
+					//
+					//проверяем, есть ли такой человек в списке
+					var checkHuman = false; //предполагаем, что нет
+					for (var i=1; i<=counter; i++) {
+						//если есть совпадение по логину
+						if (_players[i].name == _user.login) {
+							checkHuman = true;
+						}
+					}
+					if (!checkHuman) {
+						var color;
+						//смотрим сколько сейчас человек
+						switch (counter) {
+							case 1: color = "blue"; break;
+							case 2: color = "brown"; break;
+							case 3: color = "green"; break;
+							default: color = "orange"; break;
+						}
+						//добавляем в конец человека
+						_players[counter+1] = 
+								{name: _user.login,
+								  sh: _user.sh,
+								  color: color,
+								  position: 0,
+								  balanse: 15000,
+								  num: counter+1
+								  };
+						//console.log(_players);
+						//ищем комнату по idr и меняем в ней players
+						db.collection("rooms").findOneAndUpdate(
+									{idr: userIdr},
+									{$set: {players: _players}}, function(err, __room) {
+										//при удачном добавлении вернуть true
+										//и в челике записать, что он играет
+										db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: userIdr}});
+										res.send(userIdr);	//отсылаем ссылку
+										db.close();
+						});
+					//если челик уже есть, возврат false
+					} else {
+						res.send(false);
+						db.close();
+					}
+				});
 				//ищем массив с игроками
 			});
 		//запрос на комнаты

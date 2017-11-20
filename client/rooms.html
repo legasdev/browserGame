@@ -50,7 +50,7 @@
 			}
 			//если нет, то рисуем
 			if (check) {
-				var str = '<div class="navbar navbar-top">\<a class="connectLink" href="game.html?idr='+_idr+'" onclick="attachRoom(\''+_idr.toString()+'\');" data-idr="'+_idr+'">Зайти</a></div>';
+				var str = '<div class="navbar navbar-top">\<input type="button" class="connectLink" value="Зайти" onclick="attachRoom(\''+_idr.toString()+'\');" data-idr="'+_idr+'"></input></div>';
 				var div = document.createElement('div');
 				div.innerHTML = str;
 				document.body.appendChild(div);
