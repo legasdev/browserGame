@@ -402,40 +402,28 @@ webSocketServer.on('connection', function(ws) {
 		var counter = 0;
 		for (var key in _players) {
 			counter++;
+		}		
+		//удаляем у все эту комнату
+		for (var i=0; i<peers.length; i++) {
+			//отсылаем им idr удаления
+			peers[i].ws.send(JSON.stringify({'type': 'deleteRoom','data': _room.idr}));
 		}
-		console.log(peers.length);
-		//перебираем всех игроков приконнекченных к rooms.html
+		var wsToDir = [];
 		
 		for (var i=0; i<counter; i++) {
 			//ищем среди всех
 			for (var j=0; j<peers.length; j++) {
-				if (peers[j].sh != undefined && _players[i] != undefined) {
-					//нашли
-					if (_players[i].sh == peers[j].sh) {
-						//отправили ему переход
-						sendRedir(peers[j].ws, _room.idr);
-						//удалили его из массива
-						peers.splice(j, 1);
-						console.log(i+' : '+j);
-					}
+				if (_players[i].sh == peers[j].sh) {
+					//записали
+					wsToDir[wsToDir.length] = peers[j].ws;
 				}
 			}
 		}
-
-		//теперь, когда игроки перешли в комнату
-		//удаляем эту комнату у всех остальных коннектов
-		console.log(peers.length);
-		for (var i=0; i<peers.length; i++) {
-			//отсылаем им idr удаления
-			peers[i].ws.sent(JSON.stringify({'type': 'deleteRoom','data':_room.idr}));
+		
+		for (var i=0; i<wsToDir.length; i++) {
+			wsToDir[i].send(JSON.stringify({'type': 'redirectToGame','data': _room.idr}));
 		}
 		console.log('Старт игровой комнаты '+_room.idr);
-	}
-	
-	function sendRedir(_ws, _idr) {
-		setTimeout(function(){
-			_ws.send(JSON.stringify({'type': 'redirectToGame', 'data': _idr}));
-		}, 500);
 	}
 	
 	/* 
