@@ -12,6 +12,7 @@ var url = "mongodb://localhost:27017/usersdb";
 //функция из севера
 var changeRoomGlobal; //функция изменения комнаты
 var addRoomGlobal; //создание новой комнаты
+var delRoomAndStartGlobal; //функция при старте комнаты и удалении для остальных
  
 app.use(express.static('../client'));
 
@@ -61,7 +62,8 @@ app.post("/api/users", jsonParser, function (req, res) {
 	var userSh = req.body.sh; //sh
 	var userIdr = req.body.idr; //idr комнаты
 	var userNum = req.body.num; //num игрока (сам выбрал)
-    var user = {login: userLogin,  //логин
+    var user = {
+				login: userLogin,  //логин
 				pass: userPass,   //пароль
 				sh: md5(md5(userLogin)+md5(nowData.toString())),  //сессия
 				whenPlaing: "*" //где сейчас играет, если не *, то играет
@@ -125,8 +127,8 @@ app.post("/api/users", jsonParser, function (req, res) {
 			//добавляем с комнату того, кто создал ее
 			//console.log(userSh);
 			db.collection("users").findOne({sh: userSh} , function(err, _user){
-				//проверяем, не играет ли человек
-				if (_user.whenPlaing == "*") {
+				//проверяем, не играет ли человек == "*"
+				if (_user.whenPlaing) {
 					_players[1] = {name: _user.login,
 								  sh: _user.sh,
 								  color: "red",
@@ -137,7 +139,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 
 					//создаем комнату с начальными параметрами
 					_room = {idr: md5(new Date()),
-							maxPlayers: 4,
+							maxPlayers: 2,
 							players: _players,
 							isPlay: 0,
 							whoPlay: 1
@@ -162,14 +164,14 @@ app.post("/api/users", jsonParser, function (req, res) {
 				if(err) return res.status(400).send();
 				//получаем массив игроков
 				//console.log("2");
-				//смотрим, играет ли игрок сейчас 
+				//смотрим, играет ли игрок сейчас == "*"
 				console.log(_user.whenPlaing);
-				if (_user.whenPlaing == "*") {
+				if (_user.whenPlaing ) {
 					db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
 						//если нашли человеека
 						var _players = _room.players;
 						//создаем человека
-						//ищем количество людей
+						//ищем количество людей в комнате
 						var counter = 0;
 						for (var key in _players) {
 							counter++;
@@ -214,7 +216,18 @@ app.post("/api/users", jsonParser, function (req, res) {
 											res.send(userIdr);	//отсылаем ссылку
 											//отправляем всем клиентам измененые данные
 											db.collection("rooms").findOne({idr: userIdr}, function(err, _room){
-												changeRoomGlobal(_room);
+												//если людей >= чем максимум, то удаляем из общей комнаты, 
+												//а людей из комнаты отправляем в игру
+												counter = 0;
+												for (var key in _players) {
+													counter++;
+												}
+												if (counter >= _room.maxPlayers) {
+													delRoomAndStartGlobal(_room);
+												} else {
+													//иначе обновляем данные в комнате
+													changeRoomGlobal(_room);
+												}
 											});
 											db.close();
 							});
@@ -337,37 +350,92 @@ webSocketServer.on('connection', function(ws) {
 				echos(m['data']); //отвечаем
 				break;
 			case 'connectToRoom':
-				peers.push(ws); //добавляем ссылку при коннекте
-				mongoClient.connect(url, function(err, db){
-					//обновляем ws клиента
-					db.collection("users").findOneAndUpdate({sh: m['data']}, {$set: {_ws: ws}});
-					db.close();
-				});
+				peers.push({ws: ws, sh: m['data']}); //добавляем ссылку при коннекте
+				console.log("Соединение с "+m['data']+" установлено.");
 				break;
 		}
 	 });
 
-	//закрываем моединение
+	//закрываем соединение
 	ws.on('close', function() {
-		peers.splice(peers.indexOf(ws), 1);
-		console.log("Закрыто соединение 2");
+		//проходимся по всем коннектам
+		for (var i=0; i<peers.length; i++) {
+			//если адреса совпадают, то удаляем
+			if (peers[i].ws == ws) {
+				console.log("Закрыто соединение c клиентом "+peers[i].sh);
+				peers.splice(i, 1);
+				console.log("Количество клиентов: "+peers.length);
+				break;
+			}
+		}
 	});
 	
 	/*
 		ИЗМЕНЕНИЕ КОМНАТЫ
 	*/
 	changeRoomGlobal = function changeRoom(_room) {
-		//отправляем комнату
-		peers.forEach(function(ws){
-			ws.send(JSON.stringify({'type':'updateRoom', 'data':_room}));
-		});
+		//отправляем комнату всем
+		for (var i=0; i<peers.length; i++) {
+			peers[i].ws.send(JSON.stringify({'type':'updateRoom', 'data':_room}));
+		}
 	}
 	
+	/*
+		ДОБАВЛЕНИЕ КОМНАТЫ
+	*/
 	addRoomGlobal = function addRoom(_room) {
-		//отправляем комнату
-		peers.forEach(function(ws){
-			ws.send(JSON.stringify({'type':'addRoom', 'data':_room}));
-		});
+		//отправляем комнату всем
+		for (var i=0; i<peers.length; i++) {
+			peers[i].ws.send(JSON.stringify({'type':'addRoom', 'data':_room}));
+		}
+	}
+	
+	/*
+		УДАЛЕНИЕ КОМНАТЫ И СТАРТ ДЛЯ ПРИКОННЕКЧЕННЫХ ИГРОКОВ
+	*/
+	delRoomAndStartGlobal = function delAndStartRoom(_room) {
+		//отсылаем клиентам, приконнекченным к комнате переход
+		//а остальным удалить комнату
+		//получаем игроков из комнаты
+		var _players = _room.players;
+		//получаем количество игроков
+		var counter = 0;
+		for (var key in _players) {
+			counter++;
+		}
+		console.log(peers.length);
+		//перебираем всех игроков приконнекченных к rooms.html
+		
+		for (var i=0; i<counter; i++) {
+			//ищем среди всех
+			for (var j=0; j<peers.length; j++) {
+				if (peers[j].sh != undefined && _players[i] != undefined) {
+					//нашли
+					if (_players[i].sh == peers[j].sh) {
+						//отправили ему переход
+						sendRedir(peers[j].ws, _room.idr);
+						//удалили его из массива
+						peers.splice(j, 1);
+						console.log(i+' : '+j);
+					}
+				}
+			}
+		}
+
+		//теперь, когда игроки перешли в комнату
+		//удаляем эту комнату у всех остальных коннектов
+		console.log(peers.length);
+		for (var i=0; i<peers.length; i++) {
+			//отсылаем им idr удаления
+			peers[i].ws.sent(JSON.stringify({'type': 'deleteRoom','data':_room.idr}));
+		}
+		console.log('Старт игровой комнаты '+_room.idr);
+	}
+	
+	function sendRedir(_ws, _idr) {
+		setTimeout(function(){
+			_ws.send(JSON.stringify({'type': 'redirectToGame', 'data': _idr}));
+		}, 500);
 	}
 	
 	/* 

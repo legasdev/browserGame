@@ -31,7 +31,7 @@
 			function onopen() {
 				//получаем список комнат
 				//ws.send(JSON.stringify({'type':'getRooms', 'data':idr}));
-				ws.send(JSON.stringify({'type':'connectToRoom', 'data': sh}));
+				ws.send(JSON.stringify({'type':'connectToRoom', 'data': sessionStorage.getItem('sh')}));
 			}
 				
 			//при получении данных с сервера
@@ -45,9 +45,21 @@
 				//сортируем полученные данные с сервера
 				switch (m['type']) {
 					//пришло обновление комнаты
-					case 'updateRoom':	updateRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
+					case 'updateRoom':	
+						//обновляем комнату
+						updateRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
 						break;
-					case 'addRoom': addRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
+					case 'addRoom': 
+						//добавляем комнату
+						addRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
+						break;
+					case 'redirectToGame':
+						//отслыаем в комнату с игрой
+						redirectToGame(m['data']);
+						break;
+					case 'deleteRoom':
+						//удаляем комнату из списка
+						deleteRoom(m['data']);
 						break;
 				}
 			}
@@ -86,60 +98,28 @@
 				}
 			});
 		};
-		//проверка на комнаты, которые активны
-		/*
-		setInterval(function() {
-			//создаем ajax запрос
-			$.ajax({
-				url: "api/users", //к юзерам
-				contentType: "application/json",
-				method: "POST",
-				data: JSON.stringify({
-					type: 4
-				}),
-				success: function (answer) {
-					if (answer != false) {
-						var elementsLink = document.getElementsByClassName("fullRoom");
-						for (var i=0; i<answer.length; i++) {
-							//добавдяем комнату
-							addRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
-							//обновляем
-							//updateRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
-						}
-						//удалить ненужные кнопки
-						
-						for (var i=0; i<elementsLink.length; i++) {
-							var check = false; //изначально не найден элемент
-							//идем по всем существующим комнатам
-							for (var j=0; j<answer.length; j++) {
-								if (elementsLink[i].getAttribute("data-idr") == answer[j].idr && answer[j].isPlay == 0) {
-									check = true; //нашли
-								}
-							}
-							//если совпадений нет, то удалить элемент
-							if (!check) {
-								//var elem = document.getElementById("roomLink");
-								//elem.parentNode.parentNode.removeChild(elem);
-								elementsLink[i].remove();
-							}
-						} 
-						//Создаем кнопку коннекта к данной комнате
-						//создание "виртуального образа" кнопки
-						//document.location.href = "game.html?idr="+answer;
-					} else {
-						//если комнат нет, то нужно проверить
-						//есть ли нулевая комната
-						var elementsLink = document.getElementsByClassName("fullRoom");
-						//если есть, то удаляем
-						if (elementsLink[0] != undefined) {
-							elementsLink[0].remove();
-						}
-						
-					}
-				}
-			})
-		}, 1000);
+		
+		/* 
+				ФУНКЦИИ ВНЕ СЕРВЕРА
 		*/
+		
+		//переход в игровую комнату
+		function redirectToGame(_idr) {
+			document.location.href = "game.html?idr="+_idr;
+		}
+		
+		//удаление комнаты из списка
+		function deleteRoom(_idr) {
+			//получаем все элементы с объектами комнаты
+			var elementP = document.getElementsByClassName("fullRoom");
+			//ищем совпадение по idr
+			for (var i=0; i<elementP.length; i++) {
+				//когда нашли совпадение, удаляем его
+				if (elementP[i].getAttribute('data-idr') == _idr) {
+					elementP[i].remove();
+				}
+			}
+		}
 		
 		//обновление комнаты
 		function updateRoom(_idr, _maxPlayers, _players) {
