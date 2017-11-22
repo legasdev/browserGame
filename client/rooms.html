@@ -7,10 +7,9 @@
 		 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 	</head>
 	<body id="body">
-		<input id="drawBtn" type="button" onclick="createRoom();" value="Create Room">
-		<!-- <canvas id="monopoly_game"></canvas>
-		<input id="drawBtn" type="button" value="Draw">
-		<input id="clearBtn" type="button" value="Clear">-->
+		<div id="allRooms">
+			<input id="drawBtn" type="button" onclick="createRoom();" value="Создать игру">
+		</div>
 	</body>
 	<script>
 		/*
@@ -61,6 +60,10 @@
 						//удаляем комнату из списка
 						deleteRoom(m['data']);
 						break;
+					case 'canDelRoom':
+						//добавляем возможность удалить комнату
+						addDelRoomButton(m['data']);
+						break;
 				}
 			}
 				
@@ -92,7 +95,9 @@
 						var elementsLink = document.getElementsByClassName("fullRoom");
 						for (var i=0; i<answer.length; i++) {
 							//добавдяем комнату
-							addRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
+							if (answer[i].isPlay == 0) {
+								addRoom(answer[i].idr, answer[i].maxPlayers, answer[i].players);
+							}
 						}
 					}
 				}
@@ -172,7 +177,7 @@
 				div.setAttribute("data-idr", _idr);
 				div.setAttribute("class", "fullRoom");
 				div.innerHTML = str;
-				document.body.appendChild(div);
+				document.getElementById("allRooms").appendChild(div);
 			}
 		}
 		

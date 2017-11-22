@@ -151,7 +151,8 @@ app.post("/api/users", jsonParser, function (req, res) {
 					})
 					//в челике записать, что он играет
 					db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
-					addRoomGlobal(_room);
+					addRoomGlobal(_room, _user.sh);
+					//так же говорим создателю, что он может удалить комнату
 					res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
 				}
 				db.close(); //закрываем коннект
@@ -223,6 +224,8 @@ app.post("/api/users", jsonParser, function (req, res) {
 													counter++;
 												}
 												if (counter >= _room.maxPlayers) {
+													//говорим, что комната играет
+													db.collection("rooms").findOneAndUpdate({idr: userIdr}, {$set: {isPlay: 1}});
 													delRoomAndStartGlobal(_room);
 												} else {
 													//иначе обновляем данные в комнате
@@ -248,8 +251,6 @@ app.post("/api/users", jsonParser, function (req, res) {
 			});
 		//запрос на комнаты
 		} else if (type == 4) {
-			var rooms = {};
-			var check = false;
 			//ищем комнаты, которые не играют
 			db.collection("rooms").find({}).toArray(
 				function(err, _rooms) {
@@ -383,10 +384,14 @@ webSocketServer.on('connection', function(ws) {
 	/*
 		ДОБАВЛЕНИЕ КОМНАТЫ
 	*/
-	addRoomGlobal = function addRoom(_room) {
+	addRoomGlobal = function addRoom(_room, _sh) {
 		//отправляем комнату всем
 		for (var i=0; i<peers.length; i++) {
 			peers[i].ws.send(JSON.stringify({'type':'addRoom', 'data':_room}));
+			//так же создателю комнаты отправляем возможность удалить комнату
+			if (peers[i].sh == _sh) {
+				peers[i].sh.send(JSON.stringify({'type':'canDelRoom', 'data': _room.idr}));
+			}
 		}
 	}
 	
@@ -410,7 +415,7 @@ webSocketServer.on('connection', function(ws) {
 		}
 		var wsToDir = [];
 		
-		for (var i=0; i<counter; i++) {
+		for (var i=1; i<=counter; i++) {
 			//ищем среди всех
 			for (var j=0; j<peers.length; j++) {
 				if (_players[i].sh == peers[j].sh) {
