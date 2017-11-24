@@ -7,12 +7,18 @@ var md5 = require("./md5");
 //* Смотрим БД *//
 var app = express();
 var jsonParser = bodyParser.json();
-var url = "mongodb://localhost:27017/usersdb";
+var host = "localhost";
+var port = "27017";
+var bd = "usersdb";
+var appport = 80;
+var wsport = 443;
+var url = "mongodb://"+host+":"+port+"/"+bd;
 
 //функция из севера
 var changeRoomGlobal; //функция изменения комнаты
 var addRoomGlobal; //создание новой комнаты
 var delRoomAndStartGlobal; //функция при старте комнаты и удалении для остальных
+var deleteRoomGlobal; //функция удаления комнаты у клиентов
  
 app.use(express.static('../client'));
 
@@ -21,7 +27,7 @@ app.get("/api/users", function(req, res){
       
     mongoClient.connect(url, function(err, db){
         db.collection("users").find({}).toArray(function(err, users){
-            res.send(users)
+            //res.send(users)
             db.close();
         });
     });
@@ -37,7 +43,7 @@ app.get("/api/users/:newroom", function(req, res){
              
             if(err) return res.status(400).send();
              
-            res.send(user);
+            //res.send(user);
             db.close();
         });
     });
@@ -70,7 +76,9 @@ app.post("/api/users", jsonParser, function (req, res) {
 			   };
 	
     mongoClient.connect(url, function(err, db){
-		if (type == 0) {
+		switch (type) {
+			//регистрация
+			case 0: {
 		//после коннекта ищем челика по логину
 			db.collection("users").findOne({login: userLogin}, function(err, _user){
 				if (err) return res.status(400).send();
@@ -89,9 +97,10 @@ app.post("/api/users", jsonParser, function (req, res) {
 					db.close();
 				}
 			});
+				break;
 		}
-		//логин
-		else if (type == 1) {
+			//логин
+			case 1: {
 			//ищем человека
 			db.collection("users").findOne({login: userLogin}, function(err, _user){
 				if (err) return res.status(400).send();
@@ -119,16 +128,17 @@ app.post("/api/users", jsonParser, function (req, res) {
 					}
 				}
 			});
+			break;
 		}
-		//создание комнаты
-		else if (type == 2) {
+			//создание комнаты
+			case 2: {
 			var _players = {};
 			var _room;
 			//добавляем с комнату того, кто создал ее
 			//console.log(userSh);
 			db.collection("users").findOne({sh: userSh} , function(err, _user){
 				//проверяем, не играет ли человек == "*"
-				if (_user.whenPlaing) {
+				if (_user.whenPlaing  == "*") {
 					_players[1] = {name: _user.login,
 								  sh: _user.sh,
 								  color: "red",
@@ -139,7 +149,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 
 					//создаем комнату с начальными параметрами
 					_room = {idr: md5(new Date()),
-							maxPlayers: 2,
+							maxPlayers: 4,
 							players: _players,
 							isPlay: 0,
 							whoPlay: 1
@@ -148,67 +158,70 @@ app.post("/api/users", jsonParser, function (req, res) {
 					//добавляем комнату в БД
 					db.collection("rooms").insertOne(_room, function(err, result) {
 						if(err) return res.status(400).send();
-					})
+					});
 					//в челике записать, что он играет
 					db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
+					console.log("**(?)** INFO:\t\tДобавлена комната: "+_room.idr);
 					addRoomGlobal(_room, _user.sh);
 					//так же говорим создателю, что он может удалить комнату
 					res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
 				}
 				db.close(); //закрываем коннект
 			});
-		//присоединение к комнате
-		} else if (type == 3) {
-			//console.log("1");
-			//ищем человека, который хочет коннекта
-			db.collection("users").findOne({sh: userSh}, function(err, _user) {
-				if(err) return res.status(400).send();
-				//получаем массив игроков
-				//console.log("2");
-				//смотрим, играет ли игрок сейчас == "*"
-				console.log(_user.whenPlaing);
-				if (_user.whenPlaing ) {
-					db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
-						//если нашли человеека
-						var _players = _room.players;
-						//создаем человека
-						//ищем количество людей в комнате
-						var counter = 0;
-						for (var key in _players) {
-							counter++;
-						}
-						//
-						//проверяем, есть ли такой человек в списке
-						var checkHuman = false; //предполагаем, что нет
-						for (var i=1; i<=counter; i++) {
-							//если игрок существует, смотрим его логин
-							if (_players[i] != undefined) {
-								if (_players[i].name == _user.login) {
-									checkHuman = true;
+		
+		}
+			//присоединение к комнате
+			case 3: {
+				//console.log("1");
+				//ищем человека, который хочет коннекта
+				db.collection("users").findOne({sh: userSh}, function(err, _user) {
+					if(err) return res.status(400).send();
+					//получаем массив игроков
+					//console.log("2");
+					//смотрим, играет ли игрок сейчас == "*"
+					if (_user.whenPlaing  == "*") {
+						db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
+							if (_room != undefined) {
+								//если нашли человеека
+								var _players = _room.players;
+								//создаем человека
+								//ищем количество людей в комнате
+								var counter = 0;
+								for (var key in _players) {
+									counter++;
 								}
-							}
-						}
-						if (!checkHuman) {
-							var color;
-							//смотрим сколько сейчас человек
-							switch (counter) {
-								case 1: color = "blue"; break;
-								case 2: color = "brown"; break;
-								case 3: color = "green"; break;
-								default: color = "orange"; break;
-							}
-							//добавляем в конец человека
-							_players[userNum] = 
-									{name: _user.login,
-									  sh: _user.sh,
-									  color: color,
-									  position: 0,
-									  balanse: 15000,
-									  num: userNum
-									  };
-							//console.log(_players);
-							//ищем комнату по idr и меняем в ней players
-							db.collection("rooms").findOneAndUpdate(
+								//
+								//проверяем, есть ли такой человек в списке
+								var checkHuman = false; //предполагаем, что нет
+								for (var i=1; i<=counter; i++) {
+									//если игрок существует, смотрим его логин
+									if (_players[i] != undefined) {
+										if (_players[i].name == _user.login) {
+											checkHuman = true;
+										}
+									}
+								}
+								if (!checkHuman) {
+									var color;
+									//смотрим сколько сейчас человек
+									switch (counter) {
+										case 1: color = "blue"; break;
+										case 2: color = "brown"; break;
+										case 3: color = "green"; break;
+										default: color = "orange"; break;
+									}
+									//добавляем в конец человека
+									_players[userNum] = 
+											{name: _user.login,
+											  sh: _user.sh,
+											  color: color,
+											  position: 0,
+											  balanse: 15000,
+											  num: userNum
+											  };
+									//console.log(_players);
+									//ищем комнату по idr и меняем в ней players
+									db.collection("rooms").findOneAndUpdate(
 										{idr: userIdr},
 										{$set: {players: _players}}, function(err, __room) {
 											//при удачном добавлении вернуть true
@@ -226,42 +239,82 @@ app.post("/api/users", jsonParser, function (req, res) {
 												if (counter >= _room.maxPlayers) {
 													//говорим, что комната играет
 													db.collection("rooms").findOneAndUpdate({idr: userIdr}, {$set: {isPlay: 1}});
-													delRoomAndStartGlobal(_room);
-												} else {
-													//иначе обновляем данные в комнате
-													changeRoomGlobal(_room);
-												}
+														delRoomAndStartGlobal(_room);
+													} else {
+														//иначе обновляем данные в комнате
+														changeRoomGlobal(_room, _players[1].sh, userSh, _user.login);
+													}
 											});
 											db.close();
-							});
-							
-							
-						//если челик уже есть, возврат false
-						} else {
-							res.send(false);
+									});
+
+
+								//если челик уже есть, возврат false
+								} else {
+									res.send(false);
+									db.close();
+								}
+							}
+						});
+					//если он уже играет, то отсылаем false
+					} else {
+						res.send(false);
+						db.close();
+					}
+					//ищем массив с игроками
+				});
+				break;
+			} 
+			//запрос на комнаты
+			case 4: {
+				//ищем комнаты, которые не играют
+				db.collection("users").findOne({sh: userSh}, function(err, _user) {
+					setTimeout(function() {
+						db.collection("rooms").find({}).toArray(
+							function(err, _rooms) {
+							for (var i=0; i<_rooms.length; i++) {
+								addRoomGlobal(_rooms[i], _rooms[i].players[1].sh, userSh, _user.login);
+							}
+							//res.send(_rooms);
 							db.close();
+						});
+					}, 500);	
+				});				
+				break;
+			}
+			//удаление комнаты
+			case 5: {
+				//удалили комнату и отослали обновление комнат
+				db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
+					if(err) return res.status(400).send();
+					//проверять, если комната не играет
+					if (_room != undefined) {
+						if (_room.isPlay == 0) {
+							//у всех, кто приконнектиллся к комнате удалить то, что они играют
+							var _players = _room.players;
+							//считаем игроков
+							var playerSH = []; //массив с sh игроков
+							//берем челика из комнаты и сверяем его sh
+							for (var i=1; i <= 10; i++) {
+								if (_players[i] != undefined) {
+									db.collection("users").findOneAndUpdate({sh: _players[i].sh}, {$set: {whenPlaing: '*'}});
+								}
+							}
+							//удалить у клиентов со страницы
+							deleteRoomGlobal(_room.idr);
+							//и удалить из базы
+							db.collection("rooms").findOneAndDelete({idr: userIdr}, function(err, result) {
+								if(err) return res.status(400).send();
+							});
 						}
-					});
-				//если он уже играет, то отсылаем false
-				} else {
-					res.send(false);
-					db.close();
-				}
-				//ищем массив с игроками
-			});
-		//запрос на комнаты
-		} else if (type == 4) {
-			//ищем комнаты, которые не играют
-			db.collection("rooms").find({}).toArray(
-				function(err, _rooms) {
-				res.send(_rooms);
-				db.close();
-			});
+					}
+				});
+				break;
+			}
 		}
-		
 	});
 });
-  
+/*
 app.delete("/api/users/:id", function(req, res){
       
     var id = new objectId(req.params.id);
@@ -296,22 +349,28 @@ app.put("/api/users", jsonParser, function(req, res){
         });
     });
 });
-  
+*/
+
 app.listen(3000, function(){
-    console.log("Сервер ожидает подключения...");
+    console.log("\t=====[ СЕРВЕР ЗАПУЩЕН ]=====");
+	console.log("**(?)** HOST:\t\t"+host);
+	console.log("**(?)** PORT:\t\t"+port);
+	console.log("**(?)** AppPort:\t"+appport);
+	console.log("**(?)** WSPort:\t\t"+wsport);
+	console.log("**(?)** DB:\t\t"+bd);
+	console.log("**(?)** INFO:\t\tСервер ждет подключений...");
 });
 
 //* Закончили работу с БД *//
 
 process.on('uncaughtException', function(err) {
-	console.log('Caught Exception: '+err);
+	console.log('**(!)** ERROR:\t\tВозникла ошибка: '+err);
 });
 
-app.listen(80);
+app.listen(appport);
 
 // использование Math.round() даст неравномерное распределение!
-function rand(min, max)
-{
+function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
@@ -328,7 +387,7 @@ var peers = []; //ссылки на клиенты
 
 // WebSocket-сервер на порту 443
 var webSocketServer = new WebSocketServer.Server({
-  port: 443
+  port: wsport
 });
 
 webSocketServer.on('connection', function(ws) {
@@ -352,7 +411,7 @@ webSocketServer.on('connection', function(ws) {
 				break;
 			case 'connectToRoom':
 				peers.push({ws: ws, sh: m['data']}); //добавляем ссылку при коннекте
-				console.log("Соединение с "+m['data']+" установлено.");
+				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
 				break;
 		}
 	 });
@@ -363,9 +422,9 @@ webSocketServer.on('connection', function(ws) {
 		for (var i=0; i<peers.length; i++) {
 			//если адреса совпадают, то удаляем
 			if (peers[i].ws == ws) {
-				console.log("Закрыто соединение c клиентом "+peers[i].sh);
+				console.log("**(?)** INFO:\t\tЗакрыто соединение c клиентом "+peers[i].sh);
 				peers.splice(i, 1);
-				console.log("Количество клиентов: "+peers.length);
+				console.log("**(?)** INFO:\t\tКоличество клиентов: "+peers.length);
 				break;
 			}
 		}
@@ -374,25 +433,46 @@ webSocketServer.on('connection', function(ws) {
 	/*
 		ИЗМЕНЕНИЕ КОМНАТЫ
 	*/
-	changeRoomGlobal = function changeRoom(_room) {
+	changeRoomGlobal = function changeRoom(_room, _sh, _addSh, _name) {
 		//отправляем комнату всем
 		for (var i=0; i<peers.length; i++) {
 			peers[i].ws.send(JSON.stringify({'type':'updateRoom', 'data':_room}));
+			//добавить кнопку удаления для создателя
+			if (peers[i].sh == _sh) {
+				peers[i].ws.send(JSON.stringify({'type':'canDelRoom', 'data': _room.idr}));
+			//добавить кнопку выхода
+			} else if (peers[i].sh == _addSh) {
+				peers[i].ws.send(JSON.stringify({'type':'canOutRoom', 'data': _room.idr, 'name': _name}));
+			}
 		}
 	}
 	
 	/*
 		ДОБАВЛЕНИЕ КОМНАТЫ
 	*/
-	addRoomGlobal = function addRoom(_room, _sh) {
+	addRoomGlobal = function addRoom(_room, _sh, _addSh, _name) {
 		//отправляем комнату всем
 		for (var i=0; i<peers.length; i++) {
 			peers[i].ws.send(JSON.stringify({'type':'addRoom', 'data':_room}));
 			//так же создателю комнаты отправляем возможность удалить комнату
 			if (peers[i].sh == _sh) {
-				peers[i].sh.send(JSON.stringify({'type':'canDelRoom', 'data': _room.idr}));
+				peers[i].ws.send(JSON.stringify({'type':'canDelRoom', 'data': _room.idr}));
+			//добавить кнопку выхода
+			} else if (peers[i].sh == _addSh) {
+				peers[i].ws.send(JSON.stringify({'type':'canOutRoom', 'data': _room.idr, 'name': _name}));
 			}
 		}
+	}
+	
+	/*
+		УДАЛЕНИЕ КОМНАТЫ
+	*/
+	deleteRoomGlobal = function deleteRoom(_idr) {
+		for (var i=0; i<peers.length; i++) {
+			//отсылаем им idr удаления
+			peers[i].ws.send(JSON.stringify({'type': 'deleteRoom','data': _idr}));
+		}
+		console.log("**(?)** INFO:\t\tУдалена комната: "+_idr);
 	}
 	
 	/*
@@ -428,7 +508,7 @@ webSocketServer.on('connection', function(ws) {
 		for (var i=0; i<wsToDir.length; i++) {
 			wsToDir[i].send(JSON.stringify({'type': 'redirectToGame','data': _room.idr}));
 		}
-		console.log('Старт игровой комнаты '+_room.idr);
+		console.log('**(?)** INFO:\t\tСтарт игровой комнаты '+_room.idr);
 	}
 	
 	/* 

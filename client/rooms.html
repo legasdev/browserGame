@@ -64,6 +64,14 @@
 						//добавляем возможность удалить комнату
 						addDelRoomButton(m['data']);
 						break;
+					case 'canOutRoom':
+						//добавить кнопку выхода из комнаты
+						addLeaveButton(m['data'], m['name']);
+						break;
+					default:
+						//если непонятная команда
+						console.log("Ошибка запроса [Непонятный запрос].");
+						break;
 				}
 			}
 				
@@ -88,7 +96,8 @@
 				contentType: "application/json",
 				method: "POST",
 				data: JSON.stringify({
-					type: 4
+					type: 4,
+					sh: sessionStorage.getItem('sh')
 				}),
 				success: function (answer) {
 					if (answer != false) {
@@ -104,16 +113,64 @@
 			});
 		};
 		
-		/* 
-				ФУНКЦИИ ВНЕ СЕРВЕРА
-		*/
+		/*****
+						ФУНКЦИИ ВНЕ СЕРВЕРА
+		*****/
 		
-		//переход в игровую комнату
+		/*
+				ДОБАВЛЕНИЕ КНОПКИ "УДАЛИТЬ КОМНАТУ"
+		*/
+		function addDelRoomButton(_idr) {
+			//ищем комнату на странице, которую создал человек
+			var allRooms = document.getElementsByClassName("fullRoom");
+			var admRoom;
+			for (var i=0; i<allRooms.length; i++) {
+				//если нашли, запишем в переменную
+				if (allRooms[i].getAttribute("data-idr") == _idr) {
+					admRoom = allRooms[i];
+					break;
+				}
+			}
+			//когда нашли, добавляем кнопку туда
+			if (admRoom.getElementsByClassName("delRoom")[0] == undefined) {
+				var strToAdd = '<input data-idr="'+_idr+'" class="delRoom" type="button" value="Удалить комнату" onclick="delRoom(\''+_idr+'\');"></input>';
+				var newDiv = document.createElement('div');
+				newDiv.setAttribute("class", "delBtn")
+				newDiv.innerHTML = strToAdd;
+				admRoom.appendChild(newDiv);
+			}
+		}
+		
+		/*
+				ЗАПРОС НА УДАЛЕНИЕ КОМНАТЫ С ЭТОГО КЛИЕНТА
+		*/
+		function delRoom(_idr) {
+			$.ajax({
+				url: "api/users", //к юзерам
+				contentType: "application/json",
+				method: "POST",
+				data: JSON.stringify({
+					type: 5,
+					idr: _idr
+				}),
+				success: function (answer) {
+					if (answer != false) {
+						
+					}
+				}
+			});
+		}
+		
+		/*
+				ПЕРЕХОД В ИГРОВУЮ КОМНАТУ
+		*/
 		function redirectToGame(_idr) {
 			document.location.href = "game.html?idr="+_idr;
 		}
 		
-		//удаление комнаты из списка
+		/*
+				УДАЛИТЬ КОМНАТУ НА СТРАНИЦЕ
+		*/
 		function deleteRoom(_idr) {
 			//получаем все элементы с объектами комнаты
 			var elementP = document.getElementsByClassName("fullRoom");
@@ -126,8 +183,13 @@
 			}
 		}
 		
-		//обновление комнаты
+		/*
+				ОБНОВИТЬ КОМНАТУ НА СТРАНИЦЕ
+		*/
 		function updateRoom(_idr, _maxPlayers, _players) {
+			//
+			// Добавление имен вместо кнопок
+			//
 			var elementP = document.getElementsByClassName("connectLink");
 			//беребираем все кнопки для коннекта
 			for (var i=0; i<elementP.length; i++) {
@@ -139,8 +201,6 @@
 							var newDiv = document.createElement('div');
 							newDiv.setAttribute("class", "loginPlayer");
 							//добавили ник челика
-							//elementP[i].innerHTML = str;
-							//elementP[i].parentNode.innerHTML = str;
 							//если игрок в этой кнопке есть, то удаляем
 							newDiv.innerHTML = _players[j].name;
 							elementP[i].parentNode.appendChild(newDiv);
@@ -149,9 +209,79 @@
 					}
 				}
 			}
+			//
+			// Добавление кнопок, вместо имен
+			//
+			//берем комнаты целиком
+			var elementP = document.getElementsByClassName("fullRoom");
+			var elementIn;
+			var checkName = false;
+			for (var i=0; i<elementP.length; i++) {
+				//перебираем до нужной комнаты
+				if (elementP[i].getAttribute("data-idr") == _idr) {
+					//собираем поля
+					elementIn = elementP[i].getElementsByClassName('connectLinks');
+					//перебираем внутренние поля
+					for (var j=0; j<elementIn.length; j++) {
+						//если нашли имя
+						if (elementIn[j].getElementsByClassName('loginPlayer')[0]) {
+							//проверяем, есть ли такое имя
+							checkName = false; //изначально имени нет
+							for (var k=1; k<=_maxPlayers; k++) {
+								//если нашли имя
+								if (_players[k] != undefined) {
+									if (elementIn[j].getElementsByClassName('loginPlayer')[0].innerHTML == _players[k].name) {
+										checkName = true; //то имя есть
+									}
+								}
+							}
+						}
+						//если имя не найдено, то удалим имя и добавим кнопку
+						if (!checkName) {
+							//удаляем имя
+							elementIn[j].getElementsByClassName('loginPlayer')[0].remove();
+							//строка с кнопкой
+							var str = '<input type="button" id="roomLink" class="connectLink" value="Зайти" onclick="attachRoom(\''+_idr.toString()+'\',\''+(j+1)+'\');" data-idr="'+_idr+'" data-num="'+(j+1)+'"></input>';
+							elementIn[j].innerHTML = str; //меняем внутри
+						}
+					}
+				}
+			}
 		}
 		
-		//добавление html кода при обновлении комнаты
+		/*
+				ДОБАВИТЬ КНОПКУ ВЫХОДА ИЗ КОМНАТЫ
+		*/
+		function addLeaveButton(_idr, _myName) {
+			//берем комнаты целиком
+			setTimeout(function() {
+				var elementP = document.getElementsByClassName("fullRoom");
+				//ищем нужную
+				for (var i=0; i<elementP.length; i++) {
+					if (elementP[i].getAttribute("data-idr") == _idr) {
+						//собираем поля
+						elementIn = elementP[i].getElementsByClassName('connectLinks');
+						//перебираем внутренние поля
+						for (var j=0; j<elementIn.length; j++) {
+							//если нашли имя
+							if (elementIn[j].getElementsByClassName('loginPlayer')[0] != undefined) {
+								if (elementIn[j].getElementsByClassName('loginPlayer')[0].innerHTML == _myName) {
+									var leaveBtn = document.createElement('input');
+									leaveBtn.setAttribute('type', 'button');
+									leaveBtn.setAttribute('value', 'Выйти из комнаты');
+									leaveBtn.setAttribute('onclick', 'Alert()');
+									elementIn[j].getElementsByClassName('loginPlayer')[0].appendChild(leaveBtn);
+								}
+							}
+						}
+					}
+				}
+			}, 100);
+		}
+		
+		/*
+				ДОБАВИТЬ НОВУЮ КОМНАТУ НА СТРАНИЦУ
+		*/
 		function addRoom(_idr, _maxPlayers, _players) {
 			var elementP = document.getElementsByClassName("connectLink");
 			var check = true;
@@ -181,7 +311,9 @@
 			}
 		}
 		
-		//Проверка на входе, при удачном входе вернется true
+		/*
+				ЗАПРОС НА СОЗДАНИЕ КОМНАТЫ НА СЕРВЕРЕ
+		*/
 		function createRoom() {
 			//создаем ajax запрос
 			$.ajax({
@@ -203,7 +335,9 @@
 			})
 		}
 		
-		//Присоединиться к комнате
+		/*
+				ЗАПРОС НА ПРИСОЕДИНИНИЕ К КОМНАТЕ
+		*/
 		function attachRoom(_idr, _num) {
 			//создаем ajax запрос
 			console.log(_idr);
