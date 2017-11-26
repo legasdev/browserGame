@@ -4,13 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Список пользователей</title>
+	<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300i" rel="stylesheet">
+	<link rel="stylesheet" href="css/listUsers.css">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="md5.js"></script>
 </head>
 <body>    
     <!-- Регистраци пользователя -->
-    <h2>Регистрация</h2>
-    <form name="regForm">
+
+    <form name="regForm" class="form">
+		<h2>Регистрация</h2>
       	<input type="hidden" name="id" value="0" />
         <div class="form-group">
             <label for="login">Логин:</label>
@@ -20,9 +24,9 @@
             <label for="pass">Пароль:</label>
             <input class="form-control" name="pass" />
         </div>
-        <div class="panel-body">
-            <button type="submit" id="regnow">Зарегистрироваться</button>
-            <button id="clear">Очистить</button>
+        <div class="panel-body button">
+            <button type="submit" id="regnow" class="btn btn1">Зарегистрироваться</button>
+            <button id="clear" class="btn btn2">Очистить</button>
         </div>
 	</form>
    <!-- Обработка -->
