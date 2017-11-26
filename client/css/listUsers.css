@@ -88,3 +88,77 @@ input {
   padding: 7.5px 19px;
   background-color: #ddd;
 }
+
+.form-rooms {
+  display: grid;
+  border: 1px solid #000;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  margin: 5%;
+  padding: 3%;
+}
+
+.form-rooms #drawBtn {
+  width: 150px;
+  height: 30px;
+  margin: 25px 25px 10px 25px;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.form-rooms #drawBtn:active {
+  border: 1px solid #aaa;
+}
+
+.form-rooms .fullRoom {
+  grid-column: 1;
+  margin: 25px 25px 10px 25px;
+}
+
+.form-rooms input {
+  grid-column: 2;
+}
+
+.form-rooms .createButton {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.loginPlayer input {
+  position: relative;
+  top: 35px;
+  right: 45px;
+  width: 150px;
+  height: 30px;
+  margin: 10px 25px 25px 25px;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.loginPlayer input:active {
+  border: 1px solid #aaa;
+}
