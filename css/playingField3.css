@@ -1,0 +1,174 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.pl {
+  transition: 1s all ease;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  width: 20px;
+  height: 20px;
+}
+
+.main {
+  position: absolute;
+  width: 100%;
+  padding-bottom: 75%;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 20% 80%;
+  width: 90%;
+  border: 1px solid #000;
+  transform: scale(0.9);
+}
+
+.field .field-players {
+  margin: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #000;
+}
+
+.field .field-game {
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  grid-template-rows: 1fr 3fr 1fr;
+  border: 0px solid #000;
+  width: 100%;
+  height: 100%;
+  margin-right: 0;
+}
+
+.field-left {
+  display: grid;
+  grid-template-rows: 3fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 3fr;
+  border: 0px solid #000;
+  grid-column: 1 / 2;
+  grid-row: 1 / 4;
+  transition: 0.1s all;
+}
+
+.field-left .celssleft {
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 5%;
+}
+
+.field-left .celssleft .pl {
+  position: relative;
+  width: 20%;
+  height: 20%;
+  margin: 5%;
+  border-radius: 100%;
+  border: 1px solid #000;
+}
+
+.field-top {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  border: 0px solid #000;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.field-top .celsstop {
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 5%;
+  transition: 1s all;
+}
+
+.field-right {
+  grid-column: 3 / 4;
+  grid-row: 1/ 4;
+  border: 0px solid #000;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 3fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 3fr;
+}
+
+.field-right .celssright {
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 5%;
+}
+
+.field-right .celssright .pl {
+  transition: 0.5s all;
+  position: relative;
+  width: 20%;
+  height: 24%;
+  margin: 6%;
+  border-radius: 100%;
+  border: 1px solid #000;
+}
+
+.field-bottom {
+  grid-column: 2 / 3;
+  grid-row: 3 / 4;
+  border: 0px solid #000;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.field-bottom .celssbottom {
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 5%;
+}
+
+.field-bottom .celssbottom .pl {
+  position: relative;
+  width: 28%;
+  height: 14%;
+  margin: 6%;
+  border-radius: 100%;
+  border: 1px solid #000;
+}
+
+.field .center-area {
+  background-color: #aaa;
+}
+
+.field-left .celssTypeMin .pl {
+  position: relative;
+  width: 15%;
+  height: 45%;
+  margin: 2%;
+  border-radius: 100%;
+  border: 1px solid #000;
+}
+
+.field-top .celssTypeMin .pl {
+  position: relative;
+  width: 28%;
+  height: 14%;
+  margin: 6%;
+  border-radius: 100%;
+  border: 1px solid #000;
+}
+
+.field-right .celssTypeMin .pl {
+  position: relative;
+  width: 15%;
+  height: 45%;
+  margin: 2%;
+  border-radius: 100%;
+  border: 1px solid #000;
+}

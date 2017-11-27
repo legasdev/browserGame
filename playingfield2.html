@@ -8,118 +8,80 @@
 	<meta name="viewport" content="initial-scale=1.0">
 	<link rel="stylesheet" href="css/playingField2.css">
 	<script src="js/jquery-2.2.4.min.js"></script>
-	<script src="js/playingField2.js"></script>
+
 </head>
 
 <body>
-	<div class="field">
-		<div class="field-players"></div>
-		<div class="field-game">
-			<div class="field-left">
-				<div class="celss1 celssleft celssTypeMax">
-					<div id="pl2" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-					<div id="pl6" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
+	<div class="empty"></div>
+	<div class="main">
+		<div class="field">
+			<div class="field-players"></div>
+			<div class="field-game">
+				<div class="field-left">
+					<div id="11" class="celss1 celss celssleft celssTypeMax">
+
+					</div>
+					<div id="10" class="celss2 celss celssleft celssTypeMin"></div>
+					<div id="9" class="celss3 celss celssleft celssTypeMin"></div>
+					<div id="8" class="celss4 celss celssleft celssTypeMin"></div>
+					<div id="7" class="celss5 celss celssleft celssTypeMin"></div>
+					<div id="6" class="celss6 celss celssleft celssTypeMin"></div>
+					<div id="5" class="celss7 celss celssleft celssTypeMin"></div>
+					<div id="4" class="celss8 celss celssleft celssTypeMin"></div>
+					<div id="3" class="celss9 celss celssleft celssTypeMin"></div>
+					<div id="2" class="celss10 celss celssleft celssTypeMin"></div>
+					<div id="1" class="celss11 celss celssleft celssTypeMax">
+						<div id="pl1" class="pl"></div>
+						<div id="pl2" class="pl"></div>
+						<div id="pl3" class="pl"></div>
+						<div id="pl4" class="pl"></div>
+						<div id="pl5" class="pl"></div>
+						<div id="pl6" class="pl"></div>
+						<div id="pl7" class="pl"></div>
+						<div id="pl8" class="pl"></div>
+					</div>
 				</div>
-				<div class="celss2 celssleft celssTypeMin">
-					<div id="pl2" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-					<div id="pl6" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
+				<div class="field-top">
+					<div id="12" class="celss12 celss celsstop celssTypeMin"></div>
+					<div id="13" class="celss13 celss celsstop celssTypeMin"></div>
+					<div id="14" class="celss14 celss celsstop celssTypeMin"></div>
+					<div id="15" class="celss15 celss celsstop celssTypeMin"></div>
+					<div id="16" class="celss16 celss celsstop celssTypeMin"></div>
+					<div id="17" class="celss17 celss celsstop celssTypeMin"></div>
+					<div id="18" class="celss18 celss celsstop celssTypeMin"></div>
+					<div id="19" class="celss19 celss celsstop celssTypeMin"></div>
+					<div id="20" class="celss20 celss celsstop celssTypeMin"></div>
 				</div>
-				<div class="celss3 celssleft celssTypeMin"></div>
-				<div class="celss4 celssleft celssTypeMin"></div>
-				<div class="celss5 celssleft celssTypeMin"></div>
-				<div class="celss6 celssleft celssTypeMin"></div>
-				<div class="celss7 celssleft celssTypeMin"></div>
-				<div class="celss8 celssleft celssTypeMin"></div>
-				<div class="celss9 celssleft celssTypeMin"></div>
-				<div class="celss10 celssleft celssTypeMin"></div>
-				<div class="celss11 celssleft celssTypeMax"></div>
+				<div class="field-right">
+					<div id="21" class="celss21 celss celssright celssTypeMax">
+					</div>
+					<div id="22" class="celss22 celss celssright celssTypeMin"></div>
+					<div id="23" class="celss23 celss celssright celssTypeMin"></div>
+					<div id="24" class="celss24 celss celssright celssTypeMin"></div>
+					<div id="25" class="celss25 celss celssright celssTypeMin"></div>
+					<div id="26" class="celss26 celss celssright celssTypeMin"></div>
+					<div id="27" class="celss27 celss celssright celssTypeMin"></div>
+					<div id="28" class="celss28 celss celssright celssTypeMin"></div>
+					<div id="29" class="celss29 celss celssright celssTypeMin"></div>
+					<div id="30" class="celss30 celss celssright celssTypeMin"></div>
+					<div id="31" class="celss31 celss celssright celssTypeMax"></div>
+				</div>
+				<div class="field-bottom">
+					<div id="40" class="celss40 celss celssbottom celssTypeMin"></div>
+					<div id="39" class="celss39 celss celssbottom celssTypeMin"></div>
+					<div id="38" class="celss38 celss celssbottom celssTypeMin"></div>
+					<div id="37" class="celss37 celss celssbottom celssTypeMin"></div>
+					<div id="36" class="celss36 celss celssbottom celssTypeMin"></div>
+					<div id="35" class="celss35 celss celssbottom celssTypeMin"></div>
+					<div id="34" class="celss34 celss celssbottom celssTypeMin"></div>
+					<div id="33" class="celss33 celss celssbottom celssTypeMin"></div>
+					<div id="32" class="celss32 celss celssbottom celssTypeMin"></div>
+				</div>
+				<div class="center-area"></div>
 			</div>
-			<div class="field-top">
-				<div class="celss12 celsstop celssTypeMin">
-					<div id="pl2" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-					<div id="pl6" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-				</div>
-				<div class="celss13 celsstop celssTypeMin"></div>
-				<div class="celss14 celsstop celssTypeMin"></div>
-				<div class="celss15 celsstop celssTypeMin"></div>
-				<div class="celss16 celsstop celssTypeMin"></div>
-				<div class="celss17 celsstop celssTypeMin"></div>
-				<div class="celss18 celsstop celssTypeMin"></div>
-				<div class="celss19 celsstop celssTypeMin"></div>
-				<div class="celss20 celsstop celssTypeMin"></div>
-			</div>
-			<div class="field-right">
-				<div class="celss21 celssright celssTypeMax">
-					<div id="pl2" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-					<div id="pl6" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div></div>
-				<div class="celss22 celssright celssTypeMin">
-					<div id="pl2" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-					<div id="pl6" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-				</div>
-				<div class="celss23 celssright celssTypeMin"></div>
-				<div class="celss24 celssright celssTypeMin"></div>
-				<div class="celss25 celssright celssTypeMin"></div>
-				<div class="celss26 celssright celssTypeMin"></div>
-				<div class="celss27 celssright celssTypeMin"></div>
-				<div class="celss28 celssright celssTypeMin"></div>
-				<div class="celss29 celssright celssTypeMin"></div>
-				<div class="celss30 celssright celssTypeMin"></div>
-				<div class="celss31 celssright celssTypeMax"></div>
-			</div>
-			<div class="field-bottom">
-				<div class="celss32 celssbottom celssTypeMin">
-					<div id="pl2" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-					<div id="pl6" class="pl"></div>
-					<div id="pl3" class="pl"></div>
-					<div id="pl4" class="pl"></div>
-					<div id="pl5" class="pl"></div>
-				</div>
-				<div class="celss33 celssbottom celssTypeMin"></div>
-				<div class="celss34 celssbottom celssTypeMin"></div>
-				<div class="celss35 celssbottom celssTypeMin"></div>
-				<div class="celss36 celssbottom celssTypeMin"></div>
-				<div class="celss36 celssbottom celssTypeMin"></div>
-				<div class="celss36 celssbottom celssTypeMin"></div>
-				<div class="celss36 celssbottom celssTypeMin"></div>
-				<div class="celss36 celssbottom celssTypeMin"></div>
-			</div>
-			<div class="center-area"></div>
 		</div>
 	</div>
-
+	<script src="js/playingField2.js"></script>
 </body>
 
 </html>
