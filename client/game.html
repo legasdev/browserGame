@@ -73,7 +73,37 @@
 			</div>
 		</div>
 	</div>
-	<script src="js/playingField2.js"></script>
+	<!--<script src="js/playingField2.js"></script>-->
+	<script>	
+		var scaleNow;
+		
+		window.onload = function() {
+			//var heightScreen = document.body.clientHeight;
+			//var widthScreen = document.body.clientWidth;
+			$('.main').css({width: "100%", height: "100%"});
+			scaleNow = 1;
+			resize();
+		};
+		
+		window.onresize = function() {
+			resize();
+		};
+		
+		function move(arrow, target) {
+			$('#'+arrow).animate({top: $('#'+target).css('top'), left: $('#'+target).css('left')}, 1000);
+		}
+		
+		function resize() {
+			var heightScreen = document.body.clientHeight;
+			heightScreen = window.innerHeight;
+			var widthScreen = document.body.clientWidth;
+			var heightNow = parseFloat($('.field').css('height'));
+			var widthNow = parseFloat($('.field').css('width'));
+			scaleNow = (heightScreen*scaleNow)/heightNow;
+			$('.field').css('transform', 'scale('+scaleNow+')');
+		}
+		
+	</script>
 </body>
 
 </html>

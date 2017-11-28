@@ -3,15 +3,32 @@ body {
   padding: 0;
 }
 
+.main {
+	display: block;
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+	-ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+}
+
 .field {
-  position: absolute;
-  left: 10%;
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 3fr;
-  width: 80%;
-  height: 100%;
+  width: 800px;
+  height: 600px;
   border: 1px solid #000;
-  transform: scale(0.9);
 }
 
 .field .center-area {
