@@ -68,6 +68,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 	var userSh = req.body.sh; //sh
 	var userIdr = req.body.idr; //idr комнаты
 	var userNum = req.body.num; //num игрока (сам выбрал)
+	var maxPlayersIn = req.body.maxPlayers; //максимум человек выбрано
     var user = {
 				login: userLogin,  //логин
 				pass: userPass,   //пароль
@@ -149,7 +150,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 
 					//создаем комнату с начальными параметрами
 					_room = {idr: md5(new Date()),
-							maxPlayers: 4,
+							maxPlayers: maxPlayersIn,
 							players: _players,
 							isPlay: 0,
 							whoPlay: 1

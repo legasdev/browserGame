@@ -11,7 +11,12 @@
 	</head>
 	<body id="body">
 		<div id="allRooms" class="button form-rooms">
-			<input id="drawBtn" type="button" onclick="createRoom();" value="Создать игру" class="createButton">
+			<div id="CreateBlock">
+				<input id="drawBtn" type="button" onclick="createRoom();" value="Создать игру" class="createButton">
+				<input type="radio" name="maxPlayersIn" value="2" checked="checked">2
+				<input type="radio" name="maxPlayersIn" value="3">3
+				<input type="radio" name="maxPlayersIn" value="4">4
+			</div>
 		</div>
 	</body>
 	<script>
@@ -325,7 +330,8 @@
 				method: "POST",
 				data: JSON.stringify({
 					type: 2,
-					sh: sessionStorage.getItem("sh")
+					sh: sessionStorage.getItem("sh"),
+					maxPlayers: parseFloat($(":radio[name=maxPlayersIn]").filter(":checked").val())
 				}),
 				success: function (answer) {
 					//если удачно, то переходим в комнату
