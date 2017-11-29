@@ -26,9 +26,42 @@ body {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 3fr;
-  width: 800px;
-  height: 600px;
+  width: 1280px;
+  height: 1024px;
   border: 1px solid #000;
+}
+
+.pl {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	border-radius: 100%;
+	border: 1px solid #000;
+}
+
+.field-left-field {
+	position: absolute;
+	width: 78px;
+	height: 156px;
+	border: 1px solid #000;
+}
+
+.field-left-field:nth-child(1) {
+	top: 845px; 
+	left: 401px;
+	width: 156px;
+}
+
+.field-left-field:nth-child(2) {
+	top: 365px; 
+	left: 440px;
+	transform: rotate(-90deg);
+}
+
+.field-left-field:nth-child(3) {
+	top: 365px; 
+	left: 0px;
+	transform: rotate(-90deg);
 }
 
 .field .center-area {

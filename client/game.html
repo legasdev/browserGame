@@ -14,68 +14,40 @@
 	<div class="empty"></div>
 	<div class="main">
 		<div class="field">
-			<div class="field-players"></div>
+			<div class="field-players">
+				<div id="players">
+					<div id="pl1" class="pl"></div>
+					<div id="pl2" class="pl"></div>
+				</div>
+			</div>
 			<div class="field-game">
 				<div class="field-left">
-					<div id="11" class="celss1 celss celssleft celssTypeMax"></div>
-					<div id="10" class="celss2 celss celssleft celssTypeMin"></div>
-					<div id="9" class="celss3 celss celssleft celssTypeMin"></div>
-					<div id="8" class="celss4 celss celssleft celssTypeMin"></div>
-					<div id="7" class="celss5 celss celssleft celssTypeMin"></div>
-					<div id="6" class="celss6 celss celssleft celssTypeMin"></div>
-					<div id="5" class="celss7 celss celssleft celssTypeMin"></div>
-					<div id="4" class="celss8 celss celssleft celssTypeMin"></div>
-					<div id="3" class="celss9 celss celssleft celssTypeMin"></div>
-					<div id="2" class="celss10 celss celssleft celssTypeMin"></div>
-					<div id="1" class="celss11 celss celssleft celssTypeMax"></div>
+					<div id="11" class="field-left-field"></div>
+					<div id="10" class="field-left-field"></div>
+					<div id="9" class="field-left-field"></div>
+					<div id="8" class="field-left-field"></div>
+					<div id="7" class="field-left-field"></div>
+					<div id="6" class="field-left-field"></div>
+					<div id="5" class="field-left-field"></div>
+					<div id="4" class="field-left-field"></div>
+					<div id="3" class="field-left-field"></div>
+					<div id="2" class="field-left-field"></div>
+					<div id="1" class="field-left-field"></div>
 				</div>
-				<div class="field-top">
-					<div id="12" class="celss12 celss celsstop celssTypeMin"></div>
-					<div id="13" class="celss13 celss celsstop celssTypeMin"></div>
-					<div id="14" class="celss14 celss celsstop celssTypeMin"></div>
-					<div id="15" class="celss15 celss celsstop celssTypeMin"></div>
-					<div id="16" class="celss16 celss celsstop celssTypeMin"></div>
-					<div id="17" class="celss17 celss celsstop celssTypeMin"></div>
-					<div id="18" class="celss18 celss celsstop celssTypeMin"></div>
-					<div id="19" class="celss19 celss celsstop celssTypeMin"></div>
-					<div id="20" class="celss20 celss celsstop celssTypeMin"></div>
+				<div class="center-area">
+					<input type="button" onclick="move('pl1','11')" value="ХОД">
 				</div>
-				<div class="field-right">
-					<div id="21" class="celss21 celss celssright celssTypeMax">
-					</div>
-					<div id="22" class="celss22 celss celssright celssTypeMin"></div>
-					<div id="23" class="celss23 celss celssright celssTypeMin"></div>
-					<div id="24" class="celss24 celss celssright celssTypeMin"></div>
-					<div id="25" class="celss25 celss celssright celssTypeMin"></div>
-					<div id="26" class="celss26 celss celssright celssTypeMin"></div>
-					<div id="27" class="celss27 celss celssright celssTypeMin"></div>
-					<div id="28" class="celss28 celss celssright celssTypeMin"></div>
-					<div id="29" class="celss29 celss celssright celssTypeMin"></div>
-					<div id="30" class="celss30 celss celssright celssTypeMin"></div>
-					<div id="31" class="celss31 celss celssright celssTypeMax"></div>
-				</div>
-				<div class="field-bottom">
-					<div id="40" class="celss40 celss celssbottom celssTypeMin"></div>
-					<div id="39" class="celss39 celss celssbottom celssTypeMin"></div>
-					<div id="38" class="celss38 celss celssbottom celssTypeMin"></div>
-					<div id="37" class="celss37 celss celssbottom celssTypeMin"></div>
-					<div id="36" class="celss36 celss celssbottom celssTypeMin"></div>
-					<div id="35" class="celss35 celss celssbottom celssTypeMin"></div>
-					<div id="34" class="celss34 celss celssbottom celssTypeMin"></div>
-					<div id="33" class="celss33 celss celssbottom celssTypeMin"></div>
-					<div id="32" class="celss32 celss celssbottom celssTypeMin"></div>
-				</div>
-				<div class="center-area"></div>
 			</div>
-			<div id="players">
-				<div id="pl1" class="pl"></div>
-				<div id="pl2" class="pl"></div>
-			</div>
+			
 		</div>
 	</div>
 	<!--<script src="js/playingField2.js"></script>-->
 	<script>	
 		var scaleNow;
+		
+		function rand(min, max) {
+  			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
 		
 		window.onload = function() {
 			//var heightScreen = document.body.clientHeight;
@@ -83,6 +55,9 @@
 			$('.main').css({width: "100%", height: "100%"});
 			scaleNow = 1;
 			resize();
+			console.log();
+			//$('.pl').offset({left: $('#1').offset().left, top: 460});
+			$('.pl').offset({left: document.getElementById('1').getBoundingClientRect().left + document.body.scrollLeft, top: document.getElementById('1').getBoundingClientRect().top + document.body.scrollTop});
 		};
 		
 		window.onresize = function() {
@@ -90,7 +65,8 @@
 		};
 		
 		function move(arrow, target) {
-			$('#'+arrow).animate({top: $('#'+target).css('top'), left: $('#'+target).css('left')}, 1000);
+			var t = rand(1, 11).toString();
+			$('#'+arrow).animate({top: $('#'+target).offset().top, left: $('#'+target).offset().left}, 1000);
 		}
 		
 		function resize() {
