@@ -1,109 +1,80 @@
 body {
-  margin: 1px;
+  margin: 0;
   padding: 0;
-  color: #fff;
   background-color: #aaa;
 }
 
-.field {
-  display: flex;
-  margin: 100px;
-  width: 920px;
-  height: 800px;
+.celss {
   border: 1px solid #000;
 }
 
-.field .field-left {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.field .field-left .celss {
-  border: 1px solid #000;
-}
-
-.field .field-left .cube {
-  width: 150px;
-  height: 150px;
-}
-
-.field .field-left .optionsCelss {
-  width: 150px;
-  height: 75px;
-}
-
-.field .field-top {
-  display: flex;
-  flex-direction: row;
-}
-
-.field .field-top .celss {
-  border: 1px solid #000;
-}
-
-.field .field-top .cube {
-  width: 130px;
-  height: 130px;
-}
-
-.field .field-top .optionsCelss {
-  height: 130px;
-  width: 75px;
-}
-
-.field .field-right {
-  display: flex;
-  flex-direction: column;
-}
-
-.field .field-right .celss {
-  border: 1px solid #000;
-}
-
-.field .field-right .cube {
-  width: 150px;
-  height: 150px;
-}
-
-.field .field-right .optionsCelss {
-  width: 150px;
-  height: 75px;
-}
-
-.field .field-bottom {
-  display: flex;
+.main {
   position: absolute;
-  top: 769px;
-  left: 255px;
-  flex-direction: row-reverse;
-}
-
-.field .field-bottom .celss {
+  width: 92%;
+  padding-bottom: 55%;
   border: 1px solid #000;
 }
 
-.field .field-bottom .cube {
-  width: 150px;
-  height: 150px;
+.main .filed {
+  display: grid;
+  position: absolute;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 1fr;
+  border: 0px solid #000;
+  height: 100%;
+  width: 100%;
 }
 
-.field .field-bottom .optionsCelss {
-  width: 75px;
-  height: 130px;
-}
-
-.position_1 {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-.position_1 div {
-  transition: 0.1s all;
-  flex-basis: 20%;
-  flex-shrink: 2;
+.main .filed .filed-players {
   border: 1px solid #000;
-  border-radius: 100px;
-  height: 20%;
+  grid-column: 1 /2;
+}
+
+.main .filed .filed-game {
+  border: 1px solid #000;
+  grid-column: 2 /3;
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  grid-template-rows: 1fr 3fr 1fr;
+}
+
+.filed-left {
+  border: 1px solid #000;
+  grid-column: 1 / 2;
+  grid-row: 1 / 4;
+  display: grid;
+  grid-template-rows: 3fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 3fr;
+}
+
+.filed-top {
+  border: 1px solid #000;
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.filed-right {
+  border: 1px solid #000;
+  grid-column: 3 / 4;
+  grid-row: 1 / 4;
+  display: grid;
+  grid-template-rows: 3fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 3fr;
+}
+
+.filed-bottom {
+  border: 1px solid #000;
+  grid-column: 2 / 3;
+  grid-row: 3 / 4;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.empty {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 2px;
+  height: 2px;
+  border: 1px solid #000;
 }
