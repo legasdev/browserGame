@@ -8,8 +8,17 @@ body {
   border: 1px solid #000;
 }
 
+#full {
+	position: relative;
+}
+
 .main {
-  position: absolute;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -ms-sticky;
+  position: -o-sticky;
+  position: sticky;
+  margin: auto;
   width: 92%;
   padding-bottom: 55%;
   border: 1px solid #000;
