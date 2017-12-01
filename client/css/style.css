@@ -1,4 +1,141 @@
 body {
-	background-color: #FFF8E7;
-	margin: 0;
+  margin: 0;
+  padding: 0;
+  background-color: #2D2D2D;
+}
+
+input {
+  outline: none;
+}
+
+.header-top {
+  display: grid;
+  width: 100%;
+  height: 70px;
+  border-bottom: 0.1px solid #000;
+  grid-template-columns: 60% 20% 20%;
+  background-color: #1D1F21;
+}
+
+.loginButton {
+  position: relative;
+  color: #F2F2F2;
+  text-align: center;
+  padding: 20px 10px 0 10px;
+  border: 1px solid #fff;
+  cursor: pointer;
+  width: 100px;
+  height: 47px;
+  transition: 0.1s all;
+  text-decoration: none;
+}
+
+.loginButton:active {
+  border: 1px solid #141517;
+  color: #000;
+}
+
+.author {
+  left: 170px;
+}
+
+.registr {
+  left: 90px;
+}
+
+.modalLogin {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  grid-gap: 1px;
+  position: absolute;
+  top: 5px;
+  right: -100%;
+  width: 420px;
+  height: 67px;
+  border: 0px solid #141517;
+  transition: 0.1s all;
+}
+
+.modalLogin .logpass {
+  position: relative;
+  top: 4px;
+  right: 25px;
+  border: 1px solid #fff;
+  height: 17px;
+  grid-column: 2 / 3;
+  padding: 5px 0 0 0px;
+}
+
+.exitbutton {
+  grid-column: 1 / 2;
+  background-color: #1D1F21;
+  color: #fff;
+  text-align: center;
+  position: absolute;
+  top: 15px;
+  left: 50px;
+  width: 100px;
+  height: 30px;
+  border: 1px solid #fff;
+  transition: 0.1s all;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.exitbutton:active {
+  border: 1px solid #141517;
+  color: #000;
+}
+
+.modalReg {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 30px 30px 30px 30px 30px;
+  grid-row-gap: 10px;
+  position: relative;
+  left: 150%;
+  bottom: 17px;
+  padding: 10px;
+  border: 0px solid #1D1F21;
+  height: 60%;
+  width: 400px;
+  transition: 0.1s all;
+  border: 1px solid #000;
+  border-bottom: none;
+}
+
+.modalReg p {
+  margin: 0;
+  padding: 0;
+}
+
+.regbutton {
+  top: 180px;
+  width: 150px;
+}
+
+.exitUser {
+  position: absolute;
+  top: 10px;
+  right: 110px;
+  text-align: center;
+  height: 35px;
+  padding: 10px 0;
+  border: 1px solid #fff;
+  background-color: #1D1F21;
+}
+
+.exitUser:active {
+  border: 1px solid #141517;
+  color: #000;
+}
+
+.backButton {
+  background-color: #1D1F21;
+  left: 210px;
+  top: 10px;
+  height: 23px;
+  padding: 5px 0 0 0;
+  width: 150px;
+  text-align: center;
 }

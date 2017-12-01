@@ -8,17 +8,8 @@ body {
   border: 1px solid #000;
 }
 
-#full {
-	position: relative;
-}
-
 .main {
-  position: -webkit-sticky;
-  position: -moz-sticky;
-  position: -ms-sticky;
-  position: -o-sticky;
-  position: sticky;
-  margin: auto;
+  position: absolute;
   width: 92%;
   padding-bottom: 55%;
   border: 1px solid #000;
@@ -77,6 +68,11 @@ body {
   grid-row: 3 / 4;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.filed-center {
+  grid-column: 2 / 3;
+  grid-row: 2/3;
 }
 
 .empty {

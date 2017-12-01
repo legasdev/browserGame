@@ -3,65 +3,23 @@ body {
   padding: 0;
 }
 
+.pl {
+  transition: 1s all ease;
+}
+
 .main {
-	display: block;
-	position: fixed;
-	height: 100%;
-	width: 100%;
-	top: 0;
-	left: 0;
-	display: flex;
-	flex-flow: row nowrap;
-	justify-content: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;
-	-ms-flex-flow: row nowrap;
-    flex-flow: row nowrap;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
+  position: absolute;
+  width: 100%;
+  padding-bottom: 75%;
 }
 
 .field {
-  position: relative;
+  position: absolute;
   display: grid;
-  grid-template-columns: 1fr 3fr;
-  width: 1280px;
-  height: 1024px;
+  grid-template-columns: 20% 80%;
+  width: 90%;
   border: 1px solid #000;
-}
-
-.pl {
-	position: absolute;
-	width: 20px;
-	height: 20px;
-	border-radius: 100%;
-	border: 1px solid #000;
-}
-
-.field-left-field {
-	position: absolute;
-	width: 78px;
-	height: 156px;
-	border: 1px solid #000;
-}
-
-.field-left-field:nth-child(1) {
-	top: 845px; 
-	left: 401px;
-	width: 156px;
-}
-
-.field-left-field:nth-child(2) {
-	top: 365px; 
-	left: 440px;
-	transform: rotate(-90deg);
-}
-
-.field-left-field:nth-child(3) {
-	top: 365px; 
-	left: 0px;
-	transform: rotate(-90deg);
+  transform: scale(0.9);
 }
 
 .field .center-area {
@@ -82,8 +40,8 @@ body {
 
 .field .field-game {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  grid-template-rows: 1fr 2fr 1fr;
+  grid-template-columns: 100px 1fr 100px;
+  grid-template-rows: 100px 1fr 100px;
   border: 1px solid #000;
   width: 100%;
   height: 100%;
@@ -92,7 +50,7 @@ body {
 
 .field-left {
   display: grid;
-  grid-template-rows: 4.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 4.5fr;
+  grid-template-rows: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 2fr;
   border: 1px solid #000;
   grid-column: 1 / 2;
   grid-row: 1 / 4;
@@ -132,6 +90,7 @@ body {
   align-items: center;
   flex-wrap: wrap;
   padding: 5%;
+  transition: 1s all;
 }
 
 .field-right {
@@ -141,7 +100,7 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: 4.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 4.5fr;
+  grid-template-rows: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 2fr;
 }
 
 .field-right .celssright {
@@ -154,10 +113,11 @@ body {
 }
 
 .field-right .celssright .pl {
+  transition: 0.5s all;
   position: relative;
   width: 20%;
-  height: 20%;
-  margin: 5%;
+  height: 24%;
+  margin: 6%;
   border-radius: 100%;
   border: 1px solid #000;
 }
@@ -181,8 +141,8 @@ body {
 
 .field-bottom .celssbottom .pl {
   position: relative;
-  width: 30%;
-  height: 7%;
+  width: 28%;
+  height: 14%;
   margin: 6%;
   border-radius: 100%;
   border: 1px solid #000;
@@ -194,8 +154,8 @@ body {
 
 .field-left .celssTypeMin .pl {
   position: relative;
-  width: 7%;
-  height: 70%;
+  width: 15%;
+  height: 45%;
   margin: 2%;
   border-radius: 100%;
   border: 1px solid #000;
@@ -203,8 +163,8 @@ body {
 
 .field-top .celssTypeMin .pl {
   position: relative;
-  width: 30%;
-  height: 7%;
+  width: 28%;
+  height: 14%;
   margin: 6%;
   border-radius: 100%;
   border: 1px solid #000;
@@ -212,9 +172,22 @@ body {
 
 .field-right .celssTypeMin .pl {
   position: relative;
-  width: 7%;
-  height: 70%;
+  width: 15%;
+  height: 45%;
   margin: 2%;
   border-radius: 100%;
   border: 1px solid #000;
+}
+
+.pl {
+  transition: 1s all;
+}
+
+.empty {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border: 1px solid #000;
+  top: 20px;
+  left: 40px;
 }
