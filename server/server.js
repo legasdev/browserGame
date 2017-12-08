@@ -143,9 +143,9 @@ app.post("/api/users", jsonParser, function (req, res) {
 					_players[1] = {name: _user.login,
 								  sh: _user.sh,
 								  color: "red",
-								  position: 0,
+								  position: 1,
 								  balanse: 15000,
-								  num: 1
+								  num: '1'
 								  };
 
 					//создаем комнату с начальными параметрами
@@ -216,7 +216,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 											{name: _user.login,
 											  sh: _user.sh,
 											  color: color,
-											  position: 0,
+											  position: 1,
 											  balanse: 15000,
 											  num: userNum
 											  };
@@ -385,6 +385,7 @@ function rand(min, max) {
 var WebSocketServer = new require('ws');
 
 var peers = []; //ссылки на клиенты
+var peersInGame = []; //ссылки на клиентов в игре
 
 // WebSocket-сервер на порту 443
 var webSocketServer = new WebSocketServer.Server({
@@ -410,9 +411,24 @@ webSocketServer.on('connection', function(ws) {
 			case 'idr':
 				echos(m['data']); //отвечаем
 				break;
+			//создание коннекта в комнате с подбором игры
 			case 'connectToRoom':
 				peers.push({ws: ws, sh: m['data']}); //добавляем ссылку при коннекте
 				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
+				break;
+			//создание коннекта в самой игре	
+			case 'connectToGame':
+				peersInGame.push({ws: ws, sh: m['data'].sh, idr: m['data'].idr}); //добавляем ссылку при коннекте с игрой
+				console.log("**(?)** INFO:\t\tСоединение с "+m['data'].sh+" установлено в игре.");
+				//запускаем функцию отылки данных при коннекте
+				getData(ws, m['data'].sh, m['data'].idr);
+				break;
+			//запрос на ход
+			case 'moveInGame':
+				moveInGame(m['data'].idr, m['data'].sh);
+				break;
+			default:
+				console.log("**(!)** ERROR:\t\tНеизвестная ошибка приема.");
 				break;
 		}
 	 });
@@ -446,6 +462,114 @@ webSocketServer.on('connection', function(ws) {
 				peers[i].ws.send(JSON.stringify({'type':'canOutRoom', 'data': _room.idr, 'name': _name}));
 			}
 		}
+	}
+	
+	/*
+		МОНОПОЛИЯ
+	*/
+	
+	//получение информации о комнате и отправка на клиенты
+	function getData(_ws, _sh, _idr) {
+		var _maxPlayers = 0, _players = [];
+		//ищем количество игроков
+		mongoClient.connect(url, function(err, db){
+			db.collection("rooms").findOne({idr: _idr}, function(err, _room) {
+				if(err) return res.status(400).send();
+				//всего игроков
+				_maxPlayers = _room.maxPlayers;
+				//игроки: (имена, баланс, цвет, когда ходит)
+				_players = [];
+				for (var i=1; i<=_room.maxPlayers; i++) {
+					_players[i-1] = {
+						name: _room.players[i].name,
+						balanse: _room.players[i].balanse,
+						color: _room.players[i].color,
+						num: _room.players[i].num,
+						pos: _room.players[i].position
+					};
+					//проверяем, если игрок ходит, то отослать возможность хода
+					if (_room.players[i].sh == _sh && _room.whoPlay == _room.players[i].num) {
+						//отсылаем показ кнопки
+						_ws.send(JSON.stringify({
+							'type': 'showMoveBtn'
+						}));	
+					} else {
+						//отсылаем показ кнопки
+						_ws.send(JSON.stringify({
+							'type': 'hideMoveBtn'
+						}));
+					}
+				}
+				//формируем данные вместе
+				var _data = {
+					maxPlayers: _maxPlayers,
+					players: _players
+				}
+				//отсылаем
+				_ws.send(JSON.stringify({
+					'type': 'updateGameRoom',
+					'data': _data
+				}));	
+				db.close();
+			}
+		)});
+	}
+	
+	//ход
+	function moveInGame(_idr, _sh) {
+		mongoClient.connect(url, function(err, db){
+			//поиск нужной комнаты
+			db.collection('rooms').findOne({idr: _idr}, function(err, _room) {
+				if (err) return res.status(400).send();
+				var players = _room.players;
+				var check = false;
+				//проходим всех игроков в данной комнате
+				for (var i=1; i<=_room.maxPlayers; i++) {
+					if (players[i].sh == _sh) {
+						check = true; //нашли игрока
+						//если номер игрока совпал с тем, кто ходит
+						//то ходим
+						if (_room.whoPlay == players[i].num) {
+							var numbers = rand(1,6)+rand(1,6);
+							//если прошли все поле
+							if (players[i].position + numbers > 40) {
+								//получаем новое число с 1
+								numbers = players[i].position + numbers - 40;
+							}
+							//новая позиция
+							players[i].position = numbers;
+							db.collection('rooms').findOneAndUpdate({idr: _idr}, {$set: {players: players}});
+							//изменяем, кто должен ходить следующий
+							var whoNext = _room.whoPlay + 1;
+							//если выходим за максимальное количество игроков, то новый круг
+							if (whoNext > _room.maxPlayers) {
+								whoNext = 1;
+							}
+							//заносим изменение в бд
+							db.collection('rooms').findOneAndUpdate({idr: _idr}, {$set: {whoPlay: whoNext}});
+							db.close();
+						}
+					}
+				}
+			});
+			//рассылаем данные о комнате обратно
+			db.collection('rooms').findOne({idr: _idr}, function(err, _room) {
+				if (err) return res.status(400).send();
+				//берем игроков
+				var players = _room.players;
+				//проходим всех подключенных пользователей в игре
+				for (var i=0; i<peersInGame.length; i++) {
+					//проходим всех игроков в комнате
+					for (var j=1; j<_room.maxPlayers; j++) {
+						//при совпадении, отсылаем данные
+						if (peersInGame[i].sh == players[j].sh) {
+							getData(peersInGame[i].ws, players[j].sh, _idr);
+						}
+					}
+				}
+				db.close();
+			});
+		});
 	}
 	
 	/*
