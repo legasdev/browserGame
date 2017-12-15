@@ -140,6 +140,7 @@ body {
   position: absolute;
   left: 0px;
   top: 0px;
+<<<<<<< HEAD
   width: 20px;
   height: 20px;
 	border-radius: 20px;
@@ -151,3 +152,12 @@ body {
 	height: 0px;
 	border: 1px solid transparent;
 }
+=======
+  width: 10px;
+  height: 10px;
+}
+
+#moveBtn {
+	width: 100%;
+}
+>>>>>>> 2eb33558031117ad8686415b938d10877a35622d
