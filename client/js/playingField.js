@@ -1,40 +1,83 @@
 var pos = {};
 var players={};
+var avatars={};
+var iter=0;
 window.onload=function(){
 	
 }
+function getCoords(elem){
+	var el=elem.getBoundingClientRect();
+	return {
+		top:el.top + pageYOffset,
+		left:el.left+pageXOffset
+	};
+}
 function createPlayers(){
+
 	var Pl=document.getElementById('empty');
 	var input=parseFloat(document.getElementById('num').value);
-	var filed=document.getElementsByClassName('main')[0];
+	var filed=document.getElementsByClassName('filed-game')[0];
 	var _height = parseFloat($('#1').css("height"));
 	var _width = parseFloat($('#1').css('width'));
+	var avatar=document.getElementsByClassName('avatar');
 	var a=$("#1").position();
+	//Создаём фишки
 	for(var i=0;i<input;i++){
 		players[i] = document.createElement('div');
 		players[i].setAttribute('class','empty');
 		players[i].setAttribute('id', 'pl'+(i+1));
 		filed.appendChild(players[i]);
-		console.log(i%2==0?2:3);
-		$("#pl"+(i+1)).css({left: a.left+(_width/(input+1))*(i+1), top: a.top+_height/(i%2==0?1.5:3)});
 		pos["pl"+(i+1)] = 1;
 	}
+	//Создаём аватарки
+	var startPosition=document.getElementById('1');
+	for(var i=0;i<input;i++){
+		avatars[i] = document.createElement('div');
+		avatars[i].setAttribute('class','avatar');
+		avatars[i].setAttribute('id', 'avatar'+(i+1));
+		startPosition.appendChild(avatars[i]);
+	}	
+	//Двигаем фишки на стартовые координаты аватарок
+		for(var i=0;i<input;i++){
+			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2,
+									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2},1000);
+		}
 }
 
-function move(arrow,target,duration=1){
-	var newSteps = 1;
-	console.log(pos.pl1);
-	newSteps = rand(1,6)+rand(1,6);
-	console.log(newSteps);
-	if (pos.pl1 + newSteps > 40) {
-		newSteps-=40-pos.pl1;
-		pos.pl1 = newSteps;
-	} else {
-		pos.pl1 += newSteps;
-	}	
-	var a=$("#"+pos.pl1.toString()).position();
-	$(arrow).animate({left: a.left, top: a.top},duration*1000);
+function move(elem=avatars[iter]){
+	var av=document.getElementsByClassName('avatar');
+	var pls=document.getElementsByClassName('empty');
+	console.log(elem);
+	
+	var Cube = 1;
+	var idAvatar=parseInt(elem.id.replace(/\D+/g," "));
+	//Текущая позиция аватарки
+	var avatarPos=parseInt(elem.parentNode.id);
+	Cube = rand(1,6)+rand(1,6);
+	//Считаем новую позицию (ID позиции) аватарки
+	var newIdElem=avatarPos +Cube;
+	//Удаляем аватарку из староко элемента и добавляем в новый
+	if (newIdElem > 40) {
+		newIdElem=Cube-(40-avatarPos);
+		document.getElementById(avatarPos).removeChild(elem);
+		document.getElementById(newIdElem).appendChild(elem);
+	} 
+	else {	
+		document.getElementById(avatarPos).removeChild(elem);
+		document.getElementById(newIdElem).appendChild(elem);
+	}
+	//Берем координаты всех аватаров и присваиваем их к фишкам
+	for(var i=0;i<av.length;i++){
+		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2,
+								top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2},1000);
+	}
+	console.log(av.length+" : "+iter);
+	if(iter==av.length-1){
+		iter=0;
+	}
+	iter++;
 }
+
 // использование Math.round() даст неравномерное распределение!
 function rand(min, max)
 {
@@ -43,7 +86,6 @@ function rand(min, max)
 
 var s = 1;
 var check = true;
-
 //размещаем по центру
 function toCenter() {
 	var heightWindow = window.innerHeight;
@@ -61,7 +103,6 @@ function toCenter() {
 //когда загрузилось
 $(document).ready(function() {
 	toCenter();
-	
 });
 
 //меняем окно

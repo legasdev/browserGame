@@ -5,8 +5,70 @@ body {
 }
 
 .celss {
-  border: 1px solid #000;
+  	border: 0px solid #000;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	flex-wrap: wrap;
 }
+.filed-left .celss:nth-child(n+2):nth-child(-n+11){
+	border-top: 1px solid #000;
+}
+.filed-right .celss:nth-child(n+2):nth-child(-n+11){
+	border-top: 1px solid #000;
+}
+.filed-left .celss:nth-child(1):nth-child(11){
+	border-right: 0px solid #000;
+}
+.filed-left .celss:nth-child(n+2):nth-child(-n+10)::before{
+	content: "";
+	position: relative;
+	left: 44%;
+	width: 12%;
+	height: 100%;
+	border-left: 1px solid #000;
+	background-color: aqua;
+}
+.filed-top .celss:nth-child(n+1){
+	border-left: 1px solid #000;
+}
+.filed-top .celss:nth-child(9){
+	border-right: 1px solid #000;
+}
+.filed-bottom .celss:nth-child(n+1){
+	border-left: 1px solid #000;
+}
+.filed-bottom .celss:nth-child(9){
+	border-right: 1px solid #000;
+}
+.filed-top .celss:nth-child(n+1)::before{
+	content: "";
+	position: relative;
+	top: 44%;
+	width: 100%;
+	height: 13%;
+	border-top: 1px solid #000;
+	background-color:brown;
+}
+.filed-right .celss:nth-child(n+2):nth-child(-n+10)::before{
+	content: "";
+	position: relative;
+	right: 44%;
+	width: 12%;
+	height: 100%;
+	border-right: 1px solid #000;
+	background-color:chartreuse;
+}
+.filed-bottom .celss:nth-child(n+1)::before{
+	content: "";
+	position: relative;
+	bottom: 44%;
+	width: 100%;
+	height: 13%;
+	border-bottom: 1px solid #000;
+	background-color:darkgreen;
+}
+
 
 .main {
   position: absolute;
@@ -20,18 +82,17 @@ body {
   position: absolute;
   grid-template-columns: 1fr 2fr;
   grid-template-rows: 1fr;
-  border: 0px solid #000;
   height: 100%;
   width: 100%;
 }
 
 .main .filed .filed-players {
-  border: 1px solid #000;
+  border: 0px solid #000;
   grid-column: 1 /2;
 }
 
 .main .filed .filed-game {
-  border: 1px solid #000;
+  border: 0px solid #000;
   grid-column: 2 /3;
   display: grid;
   grid-template-columns: 1fr 3fr 1fr;
@@ -39,7 +100,7 @@ body {
 }
 
 .filed-left {
-  border: 1px solid #000;
+  border-left: 1px solid #000;
   grid-column: 1 / 2;
   grid-row: 1 / 4;
   display: grid;
@@ -47,7 +108,7 @@ body {
 }
 
 .filed-top {
-  border: 1px solid #000;
+  border: 0px solid #000;
   grid-column: 2 / 3;
   grid-row: 1 / 2;
   display: grid;
@@ -55,7 +116,7 @@ body {
 }
 
 .filed-right {
-  border: 1px solid #000;
+  border: 0px solid #000;
   grid-column: 3 / 4;
   grid-row: 1 / 4;
   display: grid;
@@ -63,7 +124,7 @@ body {
 }
 
 .filed-bottom {
-  border: 1px solid #000;
+  border: 0px solid #000;
   grid-column: 2 / 3;
   grid-row: 3 / 4;
   display: grid;
@@ -72,14 +133,21 @@ body {
 
 .filed-center {
   grid-column: 2 / 3;
-  grid-row: 2/3;
+  grid-row: 2 / 3;
 }
 
 .empty {
   position: absolute;
   left: 0px;
   top: 0px;
-  width: 2px;
-  height: 2px;
+  width: 20px;
+  height: 20px;
+	border-radius: 20px;
   border: 1px solid #000;
+}
+.avatar{
+	margin: 10%;
+	width: 0px;
+	height: 0px;
+	border: 1px solid transparent;
 }
