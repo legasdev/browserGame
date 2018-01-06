@@ -20,15 +20,7 @@ body {
 .filed-left .celss:nth-child(1):nth-child(11){
 	border-right: 0px solid #000;
 }
-.filed-left .celss:nth-child(n+2):nth-child(-n+10)::before{
-	content: "";
-	position: relative;
-	left: 44%;
-	width: 12%;
-	height: 100%;
-	border-left: 1px solid #000;
-	background-color: aqua;
-}
+
 .filed-top .celss:nth-child(n+1){
 	border-left: 1px solid #000;
 }
@@ -40,6 +32,15 @@ body {
 }
 .filed-bottom .celss:nth-child(9){
 	border-right: 1px solid #000;
+}
+.filed-left .celss:nth-child(n+2):nth-child(-n+10)::before{
+content: "";
+position: relative;
+left: 44%;
+width: 12%;
+height: 100%;
+border-left: 1px solid #000;
+background-color: aqua;
 }
 .filed-top .celss:nth-child(n+1)::before{
 	content: "";

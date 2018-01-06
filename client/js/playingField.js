@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 var pos = {};
 var players={};
 var avatars={};
@@ -77,7 +76,7 @@ function move(elem=avatars[iter]){
 		iter=0;
 	}
 	iter++;
-=======
+}
 var maxPlayers;
 var players = [];
 
@@ -249,7 +248,6 @@ function _move(arrow,target,duration=1){
 	}	
 	var a=$("#"+pos.pl1.toString()).position();
 	$(arrow).animate({left: a.left, top: a.top},duration*1000);
->>>>>>> 2eb33558031117ad8686415b938d10877a35622d
 }
 
 // использование Math.round() даст неравномерное распределение!
