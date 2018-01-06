@@ -258,28 +258,40 @@ function rand(min, max)
 
 var s = 1;
 var check = true;
-//размещаем по центру
-function toCenter() {
-	var heightWindow = window.innerHeight;
-	var heightField = parseFloat($("#full").css('height'));
-	$("#full").css('top', (heightWindow-heightField)/2);
-	//если поле шире, чем размер экрана по вертикали
-	if (heightField>heightWindow) {
-		s = heightWindow*s/heightField;
-		$("#full").css('transform', 'scale('+s+')');
+
+//изменение размера под экран
+var timerResize;
+		
+function resize() {
+	var heightScreen = window.innerHeight;
+	var widthScreen = window.innerWidth;
+	console.log(parseFloat($('.main').css('width')));
+	//var widthScreen = document.body.clientWidth;
+	//$('#main').css({width: "100%", height: "100%"});
+	if (800/500 < widthScreen/heightScreen) {
+		$('.main').css('transform', 'scale('+heightScreen/500+')');
+		$('.main').css('top', (heightScreen-500)/2);
+		$('.main').css('left', (widthScreen-800)/2);
 	} else {
-		$("#full").css('transform', 'scale(1)');
+		$('.main').css('transform', 'scale('+widthScreen/800+')');
+		$('.main').css('top', (heightScreen-500)/2);
+		$('.main').css('left', (widthScreen-800)/2);
 	}
 }
 
+
 //когда загрузилось
 $(document).ready(function() {
-	toCenter();
+	resize();
+	resize();
 });
 
 //меняем окно
 window.onresize = function() {
-	toCenter();
+	clearTimeout(timerResize);
+	timerResize = setTimeout(function(){
+		resize();
+	}, 100);
 	//обновляем позиции игроков
 	updatePlayers(maxPlayers, players);
 };

@@ -4,6 +4,21 @@ body {
   background-color: #aaa;
 }
 
+#full {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.main {
+	position: relative;
+	width: 800px;
+	height: 500px;
+	border: 1px solid #000;
+}
+
 .celss {
   	border: 0px solid #000;
 	display: flex;
@@ -71,12 +86,6 @@ background-color: aqua;
 }
 
 
-.main {
-  position: absolute;
-  width: 92%;
-  padding-bottom: 55%;
-  border: 1px solid #000;
-}
 
 .main .filed {
   display: grid;
