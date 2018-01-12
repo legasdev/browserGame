@@ -4,12 +4,16 @@ body {
 }
 
 .header {
+  display: -ms-grid;
   display: grid;
-  grid-template-rows: 70px 200px;
-  filter: blur(0px);
+  -ms-grid-rows: 70px 200px;
+      grid-template-rows: 70px 200px;
+  -webkit-filter: blur(0px);
+          filter: blur(0px);
 }
 
 .header-top {
+  display: -ms-grid;
   display: grid;
   border: 1px solid #000;
   height: 70px;
@@ -23,6 +27,8 @@ body {
 
 .modal {
   position: absolute;
+  -webkit-transition: 0.2s all;
+  -o-transition: 0.2s all;
   transition: 0.2s all;
   top: 0;
   left: 200%;
@@ -34,6 +40,8 @@ body {
 .modal-blur {
   display: none;
   position: absolute;
+  -webkit-transition: 0.2s all;
+  -o-transition: 0.2s all;
   transition: 0.2s all;
   top: 0;
   left: 0;
