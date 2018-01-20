@@ -2,16 +2,15 @@ var pos = {};
 var players={};
 var avatars={};
 var iter=0;
-window.onload=function(){
-	
-}
+
 function getCoords(elem){
 	var el=elem.getBoundingClientRect();
 	return {
 		top:el.top + pageYOffset,
-		left:el.left+pageXOffset
+		left:el.left + pageXOffset
 	};
 }
+
 function createPlayers(){
 
 	var Pl=document.getElementById('empty');

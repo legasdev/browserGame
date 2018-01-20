@@ -385,6 +385,7 @@ function rand(min, max) {
 var WebSocketServer = new require('ws');
 
 var peers = []; //ссылки на клиенты
+var peersInGame = []; //ссылки на клиенты в игре
 
 // WebSocket-сервер на порту 443
 var webSocketServer = new WebSocketServer.Server({
@@ -413,6 +414,10 @@ webSocketServer.on('connection', function(ws) {
 			case 'connectToRoom':
 				peers.push({ws: ws, sh: m['data']}); //добавляем ссылку при коннекте
 				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
+				break;
+			case 'connectToGame':
+				peersInGame.push({ws: ws, sh: m['data'].sh, idr: m['data'].idr});
+				//добавляем ссылки игроков уже в игре
 				break;
 		}
 	 });
