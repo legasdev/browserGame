@@ -260,7 +260,7 @@ var check = true;
 
 //изменение размера под экран
 var timerResize;
-		
+		//fdf
 function resize() {
 	var heightScreen = window.innerHeight;
 	var widthScreen = window.innerWidth;
