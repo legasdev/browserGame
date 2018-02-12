@@ -289,7 +289,7 @@ var check = true;
 
 //изменение размера под экран
 var timerResize;
-		
+		//fdf
 function resize() {
 
 	var empty=document.getElementsByClassName('empty');
