@@ -2,6 +2,7 @@ var pos = {};
 var players={};
 var avatars={};
 var iter=0;
+var colors={};
 
 function getCoords(elem){
 	var el=elem.getBoundingClientRect();
@@ -10,11 +11,15 @@ function getCoords(elem){
 		left:el.left + pageXOffset
 	};
 }
+	var ErrCoordsLeft=document.getElementsByClassName('main')[0].getBoundingClientRect().left;
+	var ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
+	var input;
 
-function createPlayers(){
-
+function createPlayers(_input){
+	resize();
 	var Pl=document.getElementById('empty');
-	var input=parseFloat(document.getElementById('num').value);
+	//input=parseFloat(document.getElementById('num').value);
+	input = _input; //ввод количества игроков
 	var filed=document.getElementsByClassName('filed-game')[0];
 	var _height = parseFloat($('#1').css("height"));
 	var _width = parseFloat($('#1').css('width'));
@@ -25,36 +30,56 @@ function createPlayers(){
 		players[i] = document.createElement('div');
 		players[i].setAttribute('class','empty');
 		players[i].setAttribute('id', 'pl'+(i+1));
+		//цвета игроков
+		colors[i]="rgb("+rand(0,255)+","+rand(0,255)+","+rand(0,255)+")";
+		players[i].style.backgroundColor=colors[i];
+		players[i].innerHTML=i+1;
+		//добавляем игроков
 		filed.appendChild(players[i]);
 		pos["pl"+(i+1)] = 1;
 	}
 	//Создаём аватарки
 	var startPosition=document.getElementById('1');
+	var leftFiled=document.getElementsByClassName('filed-players')[0];
+	console.log(leftFiled);
+	var div;
 	for(var i=0;i<input;i++){
 		avatars[i] = document.createElement('div');
 		avatars[i].setAttribute('class','avatar');
 		avatars[i].setAttribute('id', 'avatar'+(i+1));
 		startPosition.appendChild(avatars[i]);
+		//создаём поля игроков слева
+		div=document.createElement('div');
+		div.style.backgroundColor=colors[i];
+		div.innerHTML=i+1+" Игрок";
+		if(input>5){
+			div.style.width="50%";
+		}
+		leftFiled.appendChild(div);
 	}	
+	resize();
 	//Двигаем фишки на стартовые координаты аватарок
 		for(var i=0;i<input;i++){
-			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2,
-									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2},1000);
+			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
 		}
+
 }
 
-function move(elem=avatars[iter]){
+function move(elem=avatars[iter], _newCube){
 	var av=document.getElementsByClassName('avatar');
 	var pls=document.getElementsByClassName('empty');
+
 	console.log(elem);
 	
 	var Cube = 1;
 	var idAvatar=parseInt(elem.id.replace(/\D+/g," "));
 	//Текущая позиция аватарки
 	var avatarPos=parseInt(elem.parentNode.id);
-	Cube = rand(1,6)+rand(1,6);
+	//Cube = rand(1,6)+rand(1,6);
+	Cube = _newCube;
 	//Считаем новую позицию (ID позиции) аватарки
-	var newIdElem=avatarPos +Cube;
+	var newIdElem=avatarPos + Cube;
 	//Удаляем аватарку из староко элемента и добавляем в новый
 	if (newIdElem > 40) {
 		newIdElem=Cube-(40-avatarPos);
@@ -67,20 +92,20 @@ function move(elem=avatars[iter]){
 	}
 	//Берем координаты всех аватаров и присваиваем их к фишкам
 	for(var i=0;i<av.length;i++){
-		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2,
-								top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2},1000);
+		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+								top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
 	}
-	console.log(av.length+" : "+iter);
+	console.log(av.length+" : "+iter+". Выпало: "+Cube+". new elem: "+newIdElem);
 	if(iter==av.length-1){
 		iter=0;
-	}
-	iter++;
+	}else{iter++;}
+	
 }
 var maxPlayers;
 var players = [];
 
 //все функции как глобальные переменные
-var move, updatePlayers, getIdr, showMoveBtn, hideMoveBtn;
+var __move, updatePlayers, getIdr, showMoveBtn, hideMoveBtn;
 /*		
 	ЗАПУСК СЕРВЕРА НА КЛИЕНТЕ
 */
@@ -96,11 +121,11 @@ window.onload = function() {
 	}
 				
 	//при открытии соединения
-	function onopen() {
-		console.log(getIdr());//ws.send(JSON.stringify({'type':'getRooms', 'data':idr}));
-		//отсылаем запрос о комнатах
+	function onopen() {//ws.send(JSON.stringify({'type':'getRooms', 'data':idr}));
+		//отсылаем запрос о комнате
 		ws.send(JSON.stringify({'type':'connectToGame', 'data': {
-			sh: sessionStorage.getItem('sh'), idr: getIdr()
+			sh: sessionStorage.getItem('sh'), 
+			idr: getIdr()
 			}
 		}));
 	}
@@ -115,11 +140,15 @@ window.onload = function() {
 				
 		//сортируем полученные данные с сервера
 		switch (m['type']) {
+			//создает игроков в комнате
+			case 'createPlayer':
+				createPlayers(m['data'].maxPlayers);
+				console.log(m['data'].players);
 			//обновление данных в комнате
 			case 'updateGameRoom':
 				console.log(m['data']);
 				//создаем игроков
-				updatePlayers(m['data'].maxPlayers, m['data'].players);
+				//updatePlayers(m['data'].maxPlayers, m['data'].players);
 				maxPlayers = m['data'].maxPlayers;
 				players = m['data'].players;
 				break;
@@ -212,25 +241,25 @@ window.onload = function() {
 
 	//показываем табличку с кнопокой хода
 	showMoveBtn = function() {
-		$('#makeMove').css('display', 'block');
+		$('#buttonMove').css('display', 'block');
 	}
 
 	//скрываем табличку с кнопокой хода
 	hideMoveBtn = function() {
-		$('#makeMove').css('display', 'none');
+		$('#buttonMove').css('display', 'none');
 	}
 
-	//функция хода
-	move = function() {
-		//отправляем на сервер инфу
-		ws.send(JSON.stringify({
-			'type': 'moveInGame',
-			'data': {
-				idr: getIdr(),
-				sh: sessionStorage.getItem('sh')
-			}
-		}));
-	}
+	// //функция хода
+	// move = function() {
+	// 	//отправляем на сервер инфу
+	// 	ws.send(JSON.stringify({
+	// 		'type': 'moveInGame',
+	// 		'data': {
+	// 			idr: getIdr(),
+	// 			sh: sessionStorage.getItem('sh')
+	// 		}
+	// 	}));
+	// }
 	
 };
 
@@ -262,35 +291,52 @@ var check = true;
 var timerResize;
 		
 function resize() {
-	var heightScreen = window.innerHeight;
-	var widthScreen = window.innerWidth;
-	console.log(parseFloat($('.main').css('width')));
-	//var widthScreen = document.body.clientWidth;
-	//$('#main').css({width: "100%", height: "100%"});
-	if (800/500 < widthScreen/heightScreen) {
-		$('.main').css('transform', 'scale('+heightScreen/500+')');
-		$('.main').css('top', (heightScreen-500)/2);
-		$('.main').css('left', (widthScreen-800)/2);
-	} else {
-		$('.main').css('transform', 'scale('+widthScreen/800+')');
-		$('.main').css('top', (heightScreen-500)/2);
-		$('.main').css('left', (widthScreen-800)/2);
+
+	var empty=document.getElementsByClassName('empty');
+	var widthMain=document.getElementsByClassName('main')[0].getBoundingClientRect().width;
+	var koef=0.018;
+	var hSize=widthMain*koef;
+	for (var i = 0; empty.length>i;i++) {
+				console.log(hSize+"px");
+		empty[i].style.width=hSize+"px";
+		empty[i].style.height=hSize+"px";
 	}
+	for(var i=0;i<input;i++){
+			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1);
+		}
+	// var heightScreen = window.innerHeight;
+	// var widthScreen = window.innerWidth;
+	// console.log(parseFloat($('.main').css('width')));
+	// //var widthScreen = document.body.clientWidth;
+	// //$('#main').css({width: "100%", height: "100%"});
+	// if (800/500 < widthScreen/heightScreen) {
+	// 	$('.main').css('transform', 'scale('+heightScreen/500+')');
+	// 	$('.main').css('top', (heightScreen-500)/2);
+	// 	$('.main').css('left', (widthScreen-800)/2);
+	// } else {
+	// 	$('.main').css('transform', 'scale('+widthScreen/800+')');
+	// 	$('.main').css('top', (heightScreen-500)/2);
+	// 	$('.main').css('left', (widthScreen-800)/2);
+	// }
 }
 
 
-//когда загрузилось
-$(document).ready(function() {
-	resize();
-	resize();
-});
+// //когда загрузилось
+// $(document).ready(function() {
+// 	resize();
+// 	resize();
+// });
 
 //меняем окно
 window.onresize = function() {
-	clearTimeout(timerResize);
-	timerResize = setTimeout(function(){
-		resize();
-	}, 100);
+	// clearTimeout(timerResize);
+	// timerResize = setTimeout(function(){
+		
+	// }, 1);
+	ErrCoordsLeft=document.getElementsByClassName('main')[0].getBoundingClientRect().left;
+	ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
+	resize();
 	//обновляем позиции игроков
-	updatePlayers(maxPlayers, players);
+	// updatePlayers(maxPlayers, players);
 };

@@ -5,6 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="css/playingField.css">
+	<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
 	<script src="js/jquery-2.2.4.min.js"></script>
 
 </head>
@@ -14,79 +15,183 @@
 	<div id="full">
 		<div class="main">
 			<div class="filed">
-				<div class="filed-players"></div>
+				<div class="filed-players">
+				</div>
 				<div class="filed-game">
 					<div class="filed-left">
-						<div class="celss" id="11"></div>
-						<div class="celss" id="10"></div>
-						<div class="celss celss9" id="9"></div>
-						<div class="celss celss8" id="8"></div>
-						<div class="celss celss7" id="7"></div>
-						<div class="celss celss6" id="6"></div>
-						<div class="celss celss5" id="5"></div>
-						<div class="celss celss4" id="4"></div>
-						<div class="celss celss3" id="3"></div>
-						<div class="celss celss2" id="2"></div>
-						<div class="celss celss1" id="1">
+						<div class="celss" >
+							<div class="celssAround1" id="11"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">
+							<div class="celssAround1" id="10"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss9">
+							<div class="celssAround1" id="9"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss8">
+							<div class="celssAround1" id="8"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss7">
+							<div class="celssAround1" id="7"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss6">
+							<div class="celssAround1" id="6"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss5">
+							<div class="celssAround1" id="5"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss4">
+							<div class="celssAround1" id="4"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss3">
+							<div class="celssAround1" id="3"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss2">
+							<div class="celssAround1" id="2"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss celss1">
+							<div class="celssAround1" id="1"></div>
+							<div class="celssAround2"></div>
 						</div>
 					</div>
 					<div class="filed-top">
-						<div class="celss" id="12"></div>
-						<div class="celss" id="13"></div>
-						<div class="celss" id="14"></div>
-						<div class="celss" id="15"></div>
-						<div class="celss" id="16"></div>
-						<div class="celss" id="17"></div>
-						<div class="celss" id="18"></div>
-						<div class="celss" id="19"></div>
-						<div class="celss" id="20"></div>
+						<div class="celss">
+							<div class="celssAround1" id="12"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">
+							<div class="celssAround1" id="13"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">
+							<div class="celssAround1" id="14"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">
+							<div class="celssAround1" id="15"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">
+							<div class="celssAround1" id="16"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">
+							<div class="celssAround1" id="17"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround1" id="18"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround1" id="19"></div>
+							<div class="celssAround2"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround1" id="20"></div>
+							<div class="celssAround2"></div>
+						</div>
 					</div>
 					<div class="filed-right">
 
-						<div class="celss" id="21"></div>
-						<div class="celss" id="22"></div>
-						<div class="celss" id="23"></div>
-						<div class="celss" id="24"></div>
-						<div class="celss" id="25"></div>
-						<div class="celss" id="26"></div>
-						<div class="celss" id="27"></div>
-						<div class="celss" id="28"></div>
-						<div class="celss" id="29"></div>
-						<div class="celss" id="30"></div>
-						<div class="celss" id="31"></div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="21"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="22"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="23"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="24"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="25"></div>
+						</div>
+						<div class="celss">	
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="26"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="27"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="28"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="29"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="30"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="31"></div>
+						</div>
 					</div>
 					<div class="filed-bottom">
 
-						<div class="celss" id="32"></div>
-						<div class="celss" id="33"></div>
-						<div class="celss" id="34"></div>
-						<div class="celss" id="35"></div>
-						<div class="celss" id="36"></div>
-						<div class="celss" id="37"></div>
-						<div class="celss" id="38"></div>
-						<div class="celss" id="39"></div>
-						<div class="celss" id="40"></div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="40"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="39"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="38"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="37"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="36"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="35"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="34"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="33"></div>
+						</div>
+						<div class="celss">							
+							<div class="celssAround2"></div>
+							<div class="celssAround1" id="32"></div>
+						</div>
 					</div>
 					<div class="filed-center">
-						<div id="makeMove" style="display: none">
-							Нажмите на кнопку, чтобы сделать следующий ход.
-							<input id="moveBtn" type="button" value="asdsad" onclick="move();">
-						</div>
-						<!--<input type="text" id="num" onkeydown="createPlayers()" >-->
-					</div>
-					<!--<div class="filed-center">
-						<input type="button" value="asdsad" onclick="move()">
+						<input id="buttonMove" type="button" value="Сходить" style="display: none" onclick="move()">
 						<input type="text" id="num" onkeydown="createPlayers();">
-					</div>-->
-					<div class="celss" id="32"></div>
-					<div class="celss" id="33"></div>
-					<div class="celss" id="34"></div>
-					<div class="celss" id="35"></div>
-					<div class="celss" id="36"></div>
-					<div class="celss" id="37"></div>
-					<div class="celss" id="38"></div>
-					<div class="celss" id="39"></div>
-					<div class="celss" id="40"></div>
+					</div>
 				</div>
 				
 			</div>

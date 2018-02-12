@@ -416,11 +416,50 @@ webSocketServer.on('connection', function(ws) {
 				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
 				break;
 			case 'connectToGame':
+				
+				//проверить, есть ли чел в массиве!!!!!!!!!!
+				
 				peersInGame.push({ws: ws, sh: m['data'].sh, idr: m['data'].idr});
 				//добавляем ссылки игроков уже в игре
+				//теперь проходимся по списку игроков в комнате
+				//если этот игрок играет и его ход, то нужно отослать
+				//показ кнопки этому клиенту
+				mongoClient.connect(url, function(err, db){
+					//нашли игровую комнату по входу idr
+					db.collection("rooms").findOne({idr: m['data'].idr}, function(err, _room){
+						//все игроки в комнате
+						var allPlayer = _room.players;
+						//проходим по всем клиентам
+						for (var i=1; i<=_room.maxPlayers; i++) {
+							//если такой в комнате есть и его ход, то показываем ему кнопку
+							if (allPlayer[i].sh == m['data'].sh && allPlayer[i].num == _room.whoPlay) {
+								//отсылаем запрос
+								for (var i=0; i<peersInGame.length; i++) {
+										ws.send(JSON.stringify({'type': 'showMoveBtn'}));
+								}
+							}
+						}
+						var _players = [];
+						//создаем массив с нужными данными об игроках
+						for (var i=1; i<=_room.maxPlayers; i++) {
+							_players[i-1] = {
+								name: allPlayer[i].name,
+								color: allPlayer[i].color,
+								position: allPlayer[i].position,
+								balanse: allPlayer[i].balanse
+							}
+						}
+						//отправляем данные о игроках при коннекте
+						ws.send(JSON.stringify({'type':'createPlayer', 'data':{
+							players: _players,
+							maxPlayers: _room.maxPlayers
+						}}));
+					});
+				});				
 				break;
 		}
 	 });
+	
 
 	//закрываем соединение
 	ws.on('close', function() {
