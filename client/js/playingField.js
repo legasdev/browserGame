@@ -15,7 +15,7 @@ function getCoords(elem){
 	var ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
 	var input;
 
-function createPlayers(_input){
+function createPlayers(_players, _input){
 	resize();
 	var Pl=document.getElementById('empty');
 	//input=parseFloat(document.getElementById('num').value);
@@ -26,12 +26,13 @@ function createPlayers(_input){
 	var avatar=document.getElementsByClassName('avatar');
 	var a=$("#1").position();
 	//Создаём фишки
-	for(var i=0;i<input;i++){
+	for(var i=0;i<_input;i++){
 		players[i] = document.createElement('div');
 		players[i].setAttribute('class','empty');
 		players[i].setAttribute('id', 'pl'+(i+1));
 		//цвета игроков
-		colors[i]="rgb("+rand(0,255)+","+rand(0,255)+","+rand(0,255)+")";
+		//colors[i]="rgb("+rand(0,255)+","+rand(0,255)+","+rand(0,255)+")";
+		colors[i]=_players[i].color;
 		players[i].style.backgroundColor=colors[i];
 		players[i].innerHTML=i+1;
 		//добавляем игроков
@@ -41,25 +42,36 @@ function createPlayers(_input){
 	//Создаём аватарки
 	var startPosition=document.getElementById('1');
 	var leftFiled=document.getElementsByClassName('filed-players')[0];
-	console.log(leftFiled);
 	var div;
-	for(var i=0;i<input;i++){
+	var namePlayerDiv;
+	var balansePlayerDiv;
+	for(var i=0;i<_input;i++){
 		avatars[i] = document.createElement('div');
 		avatars[i].setAttribute('class','avatar');
 		avatars[i].setAttribute('id', 'avatar'+(i+1));
 		startPosition.appendChild(avatars[i]);
 		//создаём поля игроков слева
 		div=document.createElement('div');
+		div.setAttribute("class", "playerInfo");
 		div.style.backgroundColor=colors[i];
-		div.innerHTML=i+1+" Игрок";
-		if(input>5){
+		if(_input>5){
 			div.style.width="50%";
 		}
 		leftFiled.appendChild(div);
+		//создаем блок с именем
+		namePlayerDiv=document.createElement('div');
+		namePlayerDiv.setAttribute("class", "playerName");
+		namePlayerDiv.innerHTML=_players[i].name;
+		div.appendChild(namePlayerDiv);
+		//создаем блок с балансом
+		balansePlayerDiv=document.createElement('div');
+		balansePlayerDiv.setAttribute("class", "playerBalanse");
+		balansePlayerDiv.innerHTML=_players[i].balanse;
+		div.appendChild(balansePlayerDiv);
 	}	
 	resize();
 	//Двигаем фишки на стартовые координаты аватарок
-		for(var i=0;i<input;i++){
+		for(var i=0;i<_input;i++){
 			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
 									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
 		}
@@ -142,7 +154,7 @@ window.onload = function() {
 		switch (m['type']) {
 			//создает игроков в комнате
 			case 'createPlayer':
-				createPlayers(m['data'].maxPlayers);
+				createPlayers(m['data'].players,m['data'].maxPlayers);
 				console.log(m['data'].players);
 			//обновление данных в комнате
 			case 'updateGameRoom':

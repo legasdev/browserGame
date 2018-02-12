@@ -142,7 +142,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 				if (_user.whenPlaing  == "*") {
 					_players[1] = {name: _user.login,
 								  sh: _user.sh,
-								  color: "red",
+								  color: "rgb(198, 144, 208)",
 								  position: 0,
 								  balanse: 15000,
 								  num: 1
@@ -170,7 +170,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 				db.close(); //закрываем коннект
 			});
 		
-		}
+			}
 			//присоединение к комнате
 			case 3: {
 				//console.log("1");
@@ -206,10 +206,10 @@ app.post("/api/users", jsonParser, function (req, res) {
 									var color;
 									//смотрим сколько сейчас человек
 									switch (counter) {
-										case 1: color = "blue"; break;
-										case 2: color = "brown"; break;
-										case 3: color = "green"; break;
-										default: color = "orange"; break;
+										case 1: color = "rgb(233,186,116)"; break;
+										case 2: color = "rgb(76,118,116)"; break;
+										case 3: color = "rgb(238,122,85)"; break;
+										default: color = "rgb(198,0,1)"; break;
 									}
 									//добавляем в конец человека
 									_players[userNum] = 
@@ -385,7 +385,7 @@ function rand(min, max) {
 var WebSocketServer = new require('ws');
 
 var peers = []; //ссылки на клиенты
-var peersInGame = []; //ссылки на клиенты в игре
+var peersInGame = [[]]; //ссылки на клиенты в игре
 
 // WebSocket-сервер на порту 443
 var webSocketServer = new WebSocketServer.Server({
@@ -416,10 +416,9 @@ webSocketServer.on('connection', function(ws) {
 				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
 				break;
 			case 'connectToGame':
-				
 				//проверить, есть ли чел в массиве!!!!!!!!!!
-				
-				peersInGame.push({ws: ws, sh: m['data'].sh, idr: m['data'].idr});
+				peersInGame[peersInGame.length][0] = 
+				peersInGame[peersInGame.length][0] =  {ws: ws, sh: m['data'].sh, idr: m['data'].idr};
 				//добавляем ссылки игроков уже в игре
 				//теперь проходимся по списку игроков в комнате
 				//если этот игрок играет и его ход, то нужно отослать
@@ -455,7 +454,8 @@ webSocketServer.on('connection', function(ws) {
 							maxPlayers: _room.maxPlayers
 						}}));
 					});
-				});				
+				});			
+				console.log(peersInGame);
 				break;
 		}
 	 });
