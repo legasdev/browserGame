@@ -1,8 +1,10 @@
 var pos = {};
-var players={};
+// var players={};
+var player={};
 var avatars={};
-var iter=0;
-var colors={};
+//var iter=0;
+var go;
+var completeAnimate;
 
 function getCoords(elem){
 	var el=elem.getBoundingClientRect();
@@ -15,103 +17,200 @@ function getCoords(elem){
 	var ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
 	var input;
 
-function createPlayers(_players, _input){
+// function createPlayers(_players, _input){
+// 	resize();
+// 	var Pl=document.getElementById('empty');
+// 	//input=parseFloat(document.getElementById('num').value);
+// 	input = _input; //ввод количества игроков
+// 	var filed=document.getElementsByClassName('filed-game')[0];
+// 	var _height = parseFloat($('#1').css("height"));
+// 	var _width = parseFloat($('#1').css('width'));
+// 	var avatar=document.getElementsByClassName('avatar');
+// 	var a=$("#1").position();
+// 	//Создаём фишки
+// 	for(var i=0;i<_input;i++){
+// 		players[i] = document.createElement('div');
+// 		players[i].setAttribute('class','empty');
+// 		players[i].setAttribute('id', 'pl'+(i+1));
+// 		//цвета игроков
+// 		players[i].style.backgroundColor=_players[i].color;
+// 		players[i].innerHTML=i+1;
+// 		//добавляем игроков
+// 		filed.appendChild(players[i]);
+// 		pos["pl"+(i+1)] = 1;
+// 	}
+// 	//Создаём аватарки
+// 	var startPosition=document.getElementById('1');
+// 	var leftFiled=document.getElementsByClassName('filed-players')[0];
+// 	var div;
+// 	var namePlayerDiv;
+// 	var balansePlayerDiv;
+// 	for(var i=0;i<_input;i++){
+// 		avatars[i] = document.createElement('div');
+// 		avatars[i].setAttribute('class','avatar');
+// 		avatars[i].setAttribute('id', 'avatar'+(i+1));
+// 		startPosition.appendChild(avatars[i]);
+// 		//создаём поля игроков слева
+// 		div=document.createElement('div');
+// 		div.setAttribute("class", "playerInfo");
+// 		div.style.backgroundColor=_players[i].color;
+// 		if(_input>5){
+// 			div.style.width="50%";
+// 		}
+// 		leftFiled.appendChild(div);
+// 		//создаем блок с именем
+// 		namePlayerDiv=document.createElement('div');
+// 		namePlayerDiv.setAttribute("class", "playerName");
+// 		namePlayerDiv.innerHTML=_players[i].name;
+// 		div.appendChild(namePlayerDiv);
+// 		//создаем блок с балансом
+// 		balansePlayerDiv=document.createElement('div');
+// 		balansePlayerDiv.setAttribute("class", "playerBalanse");
+// 		balansePlayerDiv.innerHTML=_players[i].balanse;
+// 		div.appendChild(balansePlayerDiv);
+// 	}	
+// 	resize();
+// 	//Двигаем фишки на стартовые координаты аватарок
+// 		for(var i=0;i<_input;i++){
+// 			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+// 									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
+// 		}
+
+// }
+function createPlayers(_players,_maxPlayers){
+	// console.log(_players[0].color);
 	resize();
+	console.log(_players);
 	var Pl=document.getElementById('empty');
-	//input=parseFloat(document.getElementById('num').value);
-	input = _input; //ввод количества игроков
+	input=_maxPlayers;
 	var filed=document.getElementsByClassName('filed-game')[0];
 	var _height = parseFloat($('#1').css("height"));
 	var _width = parseFloat($('#1').css('width'));
 	var avatar=document.getElementsByClassName('avatar');
 	var a=$("#1").position();
 	//Создаём фишки
-	for(var i=0;i<_input;i++){
-		players[i] = document.createElement('div');
-		players[i].setAttribute('class','empty');
-		players[i].setAttribute('id', 'pl'+(i+1));
+	for(var i=0;i<input;i++){
+		player[i] = document.createElement('div');
+		player[i].setAttribute('class','empty');
+		player[i].setAttribute('id', 'pl'+(i+1));
 		//цвета игроков
-		//colors[i]="rgb("+rand(0,255)+","+rand(0,255)+","+rand(0,255)+")";
-		colors[i]=_players[i].color;
-		players[i].style.backgroundColor=colors[i];
-		players[i].innerHTML=i+1;
+		player[i].style.backgroundColor=_players[i].color;
+		// player[i].innerHTML=_players[i].id;
 		//добавляем игроков
-		filed.appendChild(players[i]);
+		filed.appendChild(player[i]);
 		pos["pl"+(i+1)] = 1;
 	}
 	//Создаём аватарки
 	var startPosition=document.getElementById('1');
 	var leftFiled=document.getElementsByClassName('filed-players')[0];
-	var div;
-	var namePlayerDiv;
-	var balansePlayerDiv;
-	for(var i=0;i<_input;i++){
+
+	var div,money,face,name;
+	for(var i=0;i<input;i++){
 		avatars[i] = document.createElement('div');
 		avatars[i].setAttribute('class','avatar');
 		avatars[i].setAttribute('id', 'avatar'+(i+1));
 		startPosition.appendChild(avatars[i]);
 		//создаём поля игроков слева
 		div=document.createElement('div');
-		div.setAttribute("class", "playerInfo");
-		div.style.backgroundColor=colors[i];
-		if(_input>5){
+		face=document.createElement('div');
+		name=document.createElement('div');
+		money=document.createElement('div');
+		//добавляем классы в дивы
+			div.classList.add('infoPlayer');
+			face.classList.add('face');
+			money.classList.add('money');
+			name.classList.add('name');
+
+		div.style.backgroundColor=_players[i].color;
+
+		name.innerHTML=_players[i].name;
+		div.insertBefore(face,div.firstChild);
+		div.appendChild(name);
+		div.appendChild(money);
+
+		money.innerHTML=_players[i].balanse;
+		if(input>5){
 			div.style.width="50%";
 		}
 		leftFiled.appendChild(div);
-		//создаем блок с именем
-		namePlayerDiv=document.createElement('div');
-		namePlayerDiv.setAttribute("class", "playerName");
-		namePlayerDiv.innerHTML=_players[i].name;
-		div.appendChild(namePlayerDiv);
-		//создаем блок с балансом
-		balansePlayerDiv=document.createElement('div');
-		balansePlayerDiv.setAttribute("class", "playerBalanse");
-		balansePlayerDiv.innerHTML=_players[i].balanse;
-		div.appendChild(balansePlayerDiv);
 	}	
 	resize();
 	//Двигаем фишки на стартовые координаты аватарок
-		for(var i=0;i<_input;i++){
-			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
-									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
+		for(var i=0;i<input;i++){
+			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-player[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+									top: getCoords(avatars[i]).top-player[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
 		}
 
 }
+// function move(iter, _newCube){
+// 	iter = parseFloat(iter);
+// 	var elem=avatars[iter];
+// 	var av=document.getElementsByClassName('avatar');
+// 	var pls=document.getElementsByClassName('empty');
 
-function move(elem=avatars[iter], _newCube){
-	var av=document.getElementsByClassName('avatar');
-	var pls=document.getElementsByClassName('empty');
-
-	console.log(elem);
+// 	console.log(elem);
 	
-	var Cube = 1;
-	var idAvatar=parseInt(elem.id.replace(/\D+/g," "));
+// 	var Cube = 1;
+// 	var idAvatar=parseInt(elem.id.replace(/\D+/g," "));
+// 	//Текущая позиция аватарки
+// 	var avatarPos=parseInt(elem.parentNode.id);
+// 	//Cube = rand(1,6)+rand(1,6);
+// 	Cube = _newCube;
+// 	//Считаем новую позицию (ID позиции) аватарки
+// 	var newIdElem = avatarPos + Cube;
+// 	//Удаляем аватарку из староко элемента и добавляем в новый
+// 	if (newIdElem > 40) {
+// 		newIdElem=Cube-(40-avatarPos);
+// 		document.getElementById(avatarPos).removeChild(elem);
+// 		document.getElementById(newIdElem).appendChild(elem);
+// 	} 
+// 	else {	
+// 		document.getElementById(avatarPos).removeChild(elem);
+// 		document.getElementById(newIdElem).appendChild(elem);
+// 	}
+// 	//Берем координаты всех аватаров и присваиваем их к фишкам
+// 	for(var i=0;i<av.length;i++){
+// 		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+// 								top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
+// 	}
+// 	console.log(av.length+" : "+iter+". Выпало: "+Cube+". new elem: "+newIdElem);
+// 	/*if(iter==av.length-1){
+// 		iter=0;
+// 	}else{iter++;}*/	
+// }
+function move(KtoHodit,Cubik){
+	console.log(KtoHodit+" : "+ Cubik);
+	var elem=avatars[KtoHodit-1];
+		console.log(avatars[KtoHodit-1].parentNode.id);
+	var av=document.getElementsByClassName('avatar');
+	var pls=document.getElementsByClassName('empty');	
 	//Текущая позиция аватарки
-	var avatarPos=parseInt(elem.parentNode.id);
-	//Cube = rand(1,6)+rand(1,6);
-	Cube = _newCube;
+	var avatarPos=avatars[KtoHodit-1].parentNode.id;
+
 	//Считаем новую позицию (ID позиции) аватарки
-	var newIdElem=avatarPos + Cube;
-	//Удаляем аватарку из староко элемента и добавляем в новый
+	var newIdElem=+avatarPos +Cubik;
+	//Удаляем аватарку из старого элемента и добавляем в новый
 	if (newIdElem > 40) {
-		newIdElem=Cube-(40-avatarPos);
-		document.getElementById(avatarPos).removeChild(elem);
-		document.getElementById(newIdElem).appendChild(elem);
+		newIdElem=Cubik-(40-avatarPos);
+		document.getElementById(avatarPos).removeChild(avatars[KtoHodit-1]);
+		document.getElementById(newIdElem).appendChild(avatars[KtoHodit-1]);
+		elem.position=newIdElem;
 	} 
 	else {	
-		document.getElementById(avatarPos).removeChild(elem);
-		document.getElementById(newIdElem).appendChild(elem);
+			console.log(newIdElem);
+
+		document.getElementById(avatarPos).removeChild(avatars[KtoHodit-1]);
+		document.getElementById(newIdElem).appendChild(avatars[KtoHodit-1]);
+		elem.position=newIdElem;
 	}
 	//Берем координаты всех аватаров и присваиваем их к фишкам
 	for(var i=0;i<av.length;i++){
-		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
-								top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1000);
-	}
-	console.log(av.length+" : "+iter+". Выпало: "+Cube+". new elem: "+newIdElem);
-	if(iter==av.length-1){
-		iter=0;
-	}else{iter++;}
-	
+		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-player[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+								top: getCoords(avatars[i]).top-player[i].getBoundingClientRect().height/2-ErrCoordsTop},{duration: 500, 
+									complete: function() {
+										completeAnimate();
+									}});
+	}	
 }
 var maxPlayers;
 var players = [];
@@ -155,10 +254,10 @@ window.onload = function() {
 			//создает игроков в комнате
 			case 'createPlayer':
 				createPlayers(m['data'].players,m['data'].maxPlayers);
-				console.log(m['data'].players);
+				// console.log(m['data'].players);
 			//обновление данных в комнате
 			case 'updateGameRoom':
-				console.log(m['data']);
+				// console.log(m['data']);
 				//создаем игроков
 				//updatePlayers(m['data'].maxPlayers, m['data'].players);
 				maxPlayers = m['data'].maxPlayers;
@@ -170,6 +269,12 @@ window.onload = function() {
 				break;
 			//скрытые кнопки хода
 			case 'hideMoveBtn':
+				hideMoveBtn();
+				break;
+			//обновление игровых позиций
+			case 'update':
+				//console.log(m['data'].cube1, m['data'].cube2, m['data'].whoMove);
+				move(m['data'].whoMove, m['data'].cube1+m['data'].cube2)
 				hideMoveBtn();
 				break;
 			default:
@@ -220,7 +325,31 @@ window.onload = function() {
 		var location = document.location.href;
 		return location.slice(location.lastIndexOf("=")+1);
 	}
-
+	
+	//ходим!
+	go = function() {
+		//отправляем запрос
+		ws.send(JSON.stringify({
+			type: 'nextStep', 
+			data: {
+				idr: getIdr(),
+				sh: sessionStorage.getItem('sh')
+			}
+		}));
+	}
+	
+	//когда закончилась анимация, говорим об этом серверу
+	completeAnimate = function() {
+		//отправляем запрос на данные, какой ответ выдать
+		ws.send(JSON.stringify({
+			type: 'completeAnimate',
+			data: {
+				idr: getIdr(),
+				sh: sessionStorage.getItem('sh')
+			}
+		}));
+	}
+	/*
 	//обновляет или создате фишки игроков
 	updatePlayers = function(numPlayers, _players){
 		//numPlayers сколько фишек создавать
@@ -249,7 +378,7 @@ window.onload = function() {
 				background: _players[i].color
 			});
 		}
-	}
+	}*/
 
 	//показываем табличку с кнопокой хода
 	showMoveBtn = function() {
@@ -309,13 +438,13 @@ function resize() {
 	var koef=0.018;
 	var hSize=widthMain*koef;
 	for (var i = 0; empty.length>i;i++) {
-				console.log(hSize+"px");
+				// console.log(hSize+"px");
 		empty[i].style.width=hSize+"px";
 		empty[i].style.height=hSize+"px";
 	}
 	for(var i=0;i<input;i++){
-			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-players[i].getBoundingClientRect().width/2-ErrCoordsLeft,
-									top: getCoords(avatars[i]).top-players[i].getBoundingClientRect().height/2-ErrCoordsTop},1);
+			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-player[i].getBoundingClientRect().width/2-ErrCoordsLeft,
+									top: getCoords(avatars[i]).top-player[i].getBoundingClientRect().height/2-ErrCoordsTop},1);
 		}
 	// var heightScreen = window.innerHeight;
 	// var widthScreen = window.innerWidth;
