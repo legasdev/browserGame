@@ -48,9 +48,9 @@
 					console.log(answer);
 					//если удачно, то переходим в комнаты
 					if (answer != false) {
-						sessionStorage.setItem('sh', answer);
+						localStorage.setItem('sh', answer);
 						
-						console.log(sessionStorage.getItem('sh'));
+						//console.log(localStorage.getItem('sh'));
 						document.location.href = "rooms.html";
 					}
 				}

@@ -38,7 +38,7 @@
 			function onopen() {
 				//получаем список комнат
 				//ws.send(JSON.stringify({'type':'getRooms', 'data':idr}));
-				ws.send(JSON.stringify({'type':'connectToRoom', 'data': sessionStorage.getItem('sh')}));
+				ws.send(JSON.stringify({'type':'connectToRoom', 'data': localStorage.getItem('sh')}));
 			}
 				
 			//при получении данных с сервера
@@ -105,7 +105,7 @@
 				method: "POST",
 				data: JSON.stringify({
 					type: 4,
-					sh: sessionStorage.getItem('sh')
+					sh: localStorage.getItem('sh')
 				}),
 				success: function (answer) {
 					if (answer != false) {
@@ -330,7 +330,7 @@
 				method: "POST",
 				data: JSON.stringify({
 					type: 2,
-					sh: sessionStorage.getItem("sh"),
+					sh: localStorage.getItem("sh"),
 					maxPlayers: parseFloat($(":radio[name=maxPlayersIn]").filter(":checked").val())
 				}),
 				success: function (answer) {
@@ -349,14 +349,14 @@
 		*/
 		function attachRoom(_idr, _num) {
 			//создаем ajax запрос
-			console.log(_idr);
+			//console.log(_idr);
 			$.ajax({
 				url: "api/users", //к юзерам
 				contentType: "application/json",
 				method: "POST",
 				data: JSON.stringify({
 					type: 3,
-					sh: sessionStorage.getItem("sh"),
+					sh: localStorage.getItem("sh"),
 					idr: _idr,
 					num: _num
 				}),

@@ -280,7 +280,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 						db.collection("rooms").find().toArray(
 							function(err, _rooms) {
 								for (var i=0; i<_rooms.length; i++) {
-									if (parseFloat(_rooms.isPlay) == 0) {
+									if (parseFloat(_rooms[i].isPlay) == 0) {
 										addRoomGlobal(_rooms[i], _rooms[i].players[1].sh, userSh, _user.login);
 									}
 							}
@@ -415,16 +415,17 @@ webSocketServer.on('connection', function(ws) {
 	ws.on('message', function(message) {
 		try {var m = JSON.parse(message);} catch(e) {return;}
 		switch (m['type']) {
+				
 			//получаем номер сессии и получаем доступ к ней
 			case 'idr':
 				echos(m['data']); //отвечаем
-				break;
+			break;
 			
 			//коннект к поиску игры
 			case 'connectToRoom':
 				peers.push({ws: ws, sh: m['data']}); //добавляем ссылку при коннекте
 				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
-				break;
+			break;
 			
 			//коннект к игровой комнате
 			case 'connectToGame':
@@ -466,7 +467,7 @@ webSocketServer.on('connection', function(ws) {
 							//все игроки в комнате
 							var allPlayer = _room.players;
 							//проходим по всем клиентам
-							for (var i=1; i<=_room.maxPlayers; i++) {
+							/*for (var i=1; i<=_room.maxPlayers; i++) {
 								//если такой в комнате есть и его ход, то показываем ему кнопку
 								if (allPlayer[i].sh == m['data'].sh && allPlayer[i].num == _room.whoPlay) {
 									//отсылаем запрос
@@ -474,7 +475,26 @@ webSocketServer.on('connection', function(ws) {
 											ws.send(JSON.stringify({'type': 'showMoveBtn'}));
 									}
 								}
+							}*/
+							
+							//кто сейчас должен играть
+							var whoPlay = _room.players[_room.whoPlay];
+
+							//находим комнату
+							for (var i=0; i<peersInGame.length; i++) {
+								if (peersInGame[i][0] == m['data'].idr) {
+									//перебор игроков
+									for (var j=1; j<peersInGame[i].length; j++) {
+										//если чел ходит, то показать кнопку, остальным скрыть
+										if (peersInGame[i][j].sh == whoPlay.sh) {
+											peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
+										} else {
+											peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
+										}
+									}
+								}
 							}
+							
 							var _players = [];
 							//создаем массив с нужными данными об игроках
 							for (var i=1; i<=_room.maxPlayers; i++) {
@@ -486,11 +506,14 @@ webSocketServer.on('connection', function(ws) {
 								}
 							}
 							//отправляем данные о игроках и таблички при коннекте
-							ws.send(JSON.stringify({'type':'createPlayer', 'data':{
-								players: _players,
-								maxPlayers: _room.maxPlayers,
-								tables: _room.tables
-							}}));
+							ws.send(JSON.stringify({
+								type:'createPlayer', 
+								data:{
+									players: _players,
+									maxPlayers: _room.maxPlayers,
+									tables: _room.tables
+								}
+							}));
 						} 
 						//если не нашлась комната
 						else {
@@ -498,7 +521,7 @@ webSocketServer.on('connection', function(ws) {
 						}
 					});
 				});			
-				break;
+			break;
 				
 			//следующий шаг в монополии
 			case 'nextStep':
@@ -530,12 +553,6 @@ webSocketServer.on('connection', function(ws) {
 									}
 									//обновляем данные в базе
 									db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {players: playersInRoom}});
-									//изменяем номер того, кто ходит
-									if (parseFloat(_room.whoPlay)+1<=parseFloat(_room.maxPlayers)) {
-										db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: parseFloat(_room.whoPlay)+1}});
-									} else {
-										db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: 1}});
-									}
 									//отправляем на клиенты обновленные позиции
 									for (var j=0; j<peersInGame.length; j++) {
 										//елси комнату нашли
@@ -559,7 +576,7 @@ webSocketServer.on('connection', function(ws) {
 					});
 					//db.close();
 				});
-				break;
+			break;
 				
 				//когда проигралась анимация на клиенте
 			case 'completeAnimate':
@@ -567,43 +584,126 @@ webSocketServer.on('connection', function(ws) {
 				mongoClient.connect(url, function(err, db){
 					//находим комнату
 					db.collection('rooms').findOne({idr: m['data'].idr}, function(err, _room){
-						//ЗДЕСЬ БУДЕТ ОБРАБОТКА СОБЫТИЯ ПОПАДАНИЯ НА ПЛАШКУ
 						
+						//определяем, что это за позиция и выводим игроку событие,
+						//которое будет выполняться
+						
+						//нашли человека
+						var whoPlay = _room.players[_room.whoPlay];
+						if (whoPlay.sh == m['data'].sh) {
+							console.log(m['data'].sh);
+							//теперь выдадим игроку сообщение, в зависимости от позиции
+							for (var i=0; i<_room.tables.length; i++) {
+								//находим плашку в бд с нужной позицией
+								if (_room.tables[i].num-1 == whoPlay.position) {
+									//если имена совпадают, то говорим, что игрок на своей клетке
+									if (_room.tables[i].owner == whoPlay.name) {
+										/////// НУЖНО СКАЗАТЬ
+									} else if (_room.tables[i].owner == 'none') {
+										//если никому не принадлежит, то предложить купить
+										for (var k=0; k<peersInGame.length; k++) {
+											if (peersInGame[k][0] == m['data'].idr) {
+												for (var t=1; t<peersInGame[k].length; t++) {
+													if (peersInGame[k][t].sh == whoPlay.sh) {
+														peersInGame[k][t].ws.send(JSON.stringify({
+															type: 'buyNotify',
+															data: {
+																price: _room.tables[i].price,
+																name: _room.tables[i].name
+															}
+														}));
+													}
+												}
+											}
+										}
+									} else {
+										//если клетка чья-то, то ищем человека и передаем деньги ему
+									}
+								}
+							}
+						}
+						//для начала найти позицию игрока в бд
+						/*for (var i=1; i<=_room.maxPlayers; i++) {
+							if (_room.players[i].sh == m['data'].sh && _room.players[i].num == parseFloat(_room.whoPlay)) {
+								//whoPlayPos = _room.players[i].position;
+								console.log(_room.whoPlay, i);
+								//есди этот номер играет
+								//теперь выдадим игроку сообщение, в зависимости от позиции
+								for (var j=0; j<_room.tables.length; j++) {
+									//находим плашку в бд с нужной позицией
+									if (_room.tables[j].num-1 == _room.players[i].position) {
+										//если имена совпадают, то говорим, что игрок на своей клетке
+										console.log(_room.tables[j].owner);
+										if (_room.tables[j].owner == _room.players[i].name) {
+											/////// НУЖНО СКАЗАТЬ
+										} else if (_room.tables[j].owner == 'none') {
+											//если никому не принадлежит, то предложить купить
+											for (var k=0; k<peersInGame.length; k++) {
+												if (peersInGame[k][0] == m['data'].idr) {
+													for (var t=1; t<peersInGame[k].length; t++) {
+														peersInGame[k][t].ws.send(JSON.stringify({
+															type: 'buyNotify',
+															data: {
+																price: _room.tables[j].price,
+																name: _room.tables[j].name
+															}
+														}));
+													}
+												}
+											}
+										} else {
+											//если клетка чья-то, то ищем человека и передаем деньги ему
+
+										}
+									}
+								}
+							}
+						}*/
+						//console.log(_room.tables[0]);
 						//пока что скрытие кнопок у всех и показ кнопки у следующего игрока
 						//определим, какой sh у игрока
 						//который ходит следующим
-						var _players = _room.players;
-						var whoNowPlaySh = "";
-						//перебираем игроков в комнате и ищем совпадение
-						for (var i=1; i<=_room.maxPlayers; i++) {
-							//при нахождении сохраняем sh
-							if (parseFloat(_players[i].num) == _room.whoPlay) {
-								whoNowPlaySh = _players[i].sh;
-							}
+						
+					});
+				});
+			break;
+			
+			//ответ на покупку ничей клетки
+			case 'getBuyAnswer':
+				//изменяем номер того, кто ходит
+				mongoClient.connect(url, function(err, db) {
+					db.collection('rooms').findOne({idr: m['data'].idr}, function (err, _room){
+						var whoMove = _room.whoPlay;
+						console.log(whoMove);
+						if (whoMove+1<=_room.maxPlayers) {
+							whoMove+=1;
+							db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: whoMove}});
+						} else {
+							db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: 1}});
+							whoMove=1;
 						}
-						//ищем комнату, если игрок в комнате
-						if (m['data'].sh == whoNowPlaySh) {
-							for (var i=0; i<peersInGame.length; i++) {
-								//находим нужную комнату с пирами
-								if (peersInGame[i][0] == m['data'].idr) {
-									//перебираем всех игроков в комнате
-									for (var j=1; j<peersInGame[i].length; j++) {
-										//если нашли человека, который ходит сейчас
-										//ему показываем кнопку
-										if (peersInGame[i][j].sh == whoNowPlaySh) {
-											peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
-										} 
-										//иначе скрыть всем остальным
-										else {
-											peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
-										}
+						
+						//кто сейчас должен играть
+						var whoPlay = _room.players[whoMove];
+						console.log(whoMove);
+						
+						//находим комнату
+						for (var i=0; i<peersInGame.length; i++) {
+							if (peersInGame[i][0] == m['data'].idr) {
+								//перебор игроков
+								for (var j=1; j<peersInGame[i].length; j++) {
+									//если чел ходит, то показать кнопку, остальным скрыть
+									if (peersInGame[i][j].sh == whoPlay.sh) {
+										peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
+									} else {
+										peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
 									}
 								}
 							}
 						}
 					});
 				});
-				break;
+			break;
 		}
 	 });
 	

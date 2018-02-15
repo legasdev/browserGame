@@ -92,6 +92,7 @@ function bgImg(celssAr){
 	}
 }
 function move(KtoHodit,Cubik){
+	var isPlay = true;
 	console.log(KtoHodit+" : "+ Cubik);
 	var elem=avatars[KtoHodit-1];
 		console.log(avatars[KtoHodit-1].parentNode.id);
@@ -110,7 +111,7 @@ function move(KtoHodit,Cubik){
 		elem.position=newIdElem;
 	} 
 	else {	
-			console.log(newIdElem);
+		//	console.log(newIdElem);
 
 		document.getElementById(avatarPos).removeChild(avatars[KtoHodit-1]);
 		document.getElementById(newIdElem).appendChild(avatars[KtoHodit-1]);
@@ -121,7 +122,10 @@ function move(KtoHodit,Cubik){
 		$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-player[i].getBoundingClientRect().width/2-ErrCoordsLeft,
 								top: getCoords(avatars[i]).top-player[i].getBoundingClientRect().height/2-ErrCoordsTop},{duration: 500, 
 									complete: function() {
-										completeAnimate();
+										if (isPlay) {
+											completeAnimate();
+											isPlay = false;
+										}
 									}});
 	}	
 }
@@ -148,7 +152,7 @@ window.onload = function() {
 	function onopen() {//ws.send(JSON.stringify({'type':'getRooms', 'data':idr}));
 		//отсылаем запрос о комнате
 		ws.send(JSON.stringify({'type':'connectToGame', 'data': {
-			sh: sessionStorage.getItem('sh'), 
+			sh: localStorage.getItem('sh'), 
 			idr: getIdr()
 			}
 		}));
@@ -173,6 +177,7 @@ window.onload = function() {
 				for(var i=0;i<m['data'].tables.length;i++) {
 					celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
 				}
+			break;
 			//обновление данных в комнате
 			case 'updateGameRoom':
 				// console.log(m['data']);
@@ -180,25 +185,37 @@ window.onload = function() {
 				//updatePlayers(m['data'].maxPlayers, m['data'].players);
 				maxPlayers = m['data'].maxPlayers;
 				players = m['data'].players;
-				break;
+			break;
 			//показываем возможность ходить
 			case 'showMoveBtn':
 				showMoveBtn();
-				break;
+				//мы ходим
+				isPlay = true;
+			break;
 			//скрытые кнопки хода
 			case 'hideMoveBtn':
 				hideMoveBtn();
-				break;
+			break;
 			//обновление игровых позиций
 			case 'update':
 				//console.log(m['data'].cube1, m['data'].cube2, m['data'].whoMove);
 				move(m['data'].whoMove, m['data'].cube1+m['data'].cube2)
 				hideMoveBtn();
-				break;
+			break;
+			//предложение о покупке
+			case 'buyNotify':
+				console.log("Купить "+m['data'].name+" за "+ m['data'].price+"?");
+				ws.send(JSON.stringify({
+					type: 'getBuyAnswer',
+					data: {
+						idr: getIdr()
+					}
+				}))
+			break;
 			default:
 				//если непонятная команда
 				console.log("Ошибка запроса [Непонятный запрос].");
-				break;
+			break;
 		}
 	}
 				
@@ -251,7 +268,7 @@ window.onload = function() {
 			type: 'nextStep', 
 			data: {
 				idr: getIdr(),
-				sh: sessionStorage.getItem('sh')
+				sh: localStorage.getItem('sh')
 			}
 		}));
 	}
@@ -263,7 +280,7 @@ window.onload = function() {
 			type: 'completeAnimate',
 			data: {
 				idr: getIdr(),
-				sh: sessionStorage.getItem('sh')
+				sh: localStorage.getItem('sh')
 			}
 		}));
 	}
