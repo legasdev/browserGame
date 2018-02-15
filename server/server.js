@@ -80,96 +80,103 @@ app.post("/api/users", jsonParser, function (req, res) {
 		switch (type) {
 			//регистрация
 			case 0: {
-		//после коннекта ищем челика по логину
-			db.collection("users").findOne({login: userLogin}, function(err, _user){
-				if (err) return res.status(400).send();
-				//если человека нет, то user=null
-				if (_user == null) {
-					//если нет, то создаем человека
-					db.collection("users").insertOne(user, function(err, result){
-						if(err) return res.status(400).send();
-					});
-					res.send(true);
-					db.close();
-				}
-				else {
-					//если челик есть, то вернуть false
-					res.send(false);
-					db.close();
-				}
-			});
+				//после коннекта ищем челика по логину
+				db.collection("users").findOne({login: userLogin}, function(err, _user){
+					if (err) return res.status(400).send();
+					//если человека нет, то user=null
+					if (_user == null) {
+						//если нет, то создаем человека
+						db.collection("users").insertOne(user, function(err, result){
+							if(err) return res.status(400).send();
+						});
+						res.send(true);
+						db.close();
+					}
+					else {
+						//если челик есть, то вернуть false
+						res.send(false);
+						db.close();
+					}
+				});
 				break;
 		}
 			//логин
 			case 1: {
-			//ищем человека
-			db.collection("users").findOne({login: userLogin}, function(err, _user){
-				if (err) return res.status(400).send();
-				//если человека нет, то user=null
-				if (_user == null) {
-					//если нет, то false ответ
-					res.send(false);
-					db.close();
-				}
-				else {
-					//если челик есть, то проверить пароли
-					if (user.pass == _user.pass) {
-						//если пароли совпадают, то вернем session hash
-						db.collection("users").findOneAndUpdate(
-							{login: user.login},
-							{$set: {sh: user.sh}}
-						)
-						res.send(user.sh);
-						db.close();
-					}
-					else {
-						//если не совпадают, то false
+				//ищем человека
+				db.collection("users").findOne({login: userLogin}, function(err, _user){
+					if (err) return res.status(400).send();
+					//если человека нет, то user=null
+					if (_user == null) {
+						//если нет, то false ответ
 						res.send(false);
 						db.close();
 					}
-				}
-			});
-			break;
+					else {
+						//если челик есть, то проверить пароли
+						if (user.pass == _user.pass) {
+							//если пароли совпадают, то вернем session hash
+							db.collection("users").findOneAndUpdate(
+								{login: user.login},
+								{$set: {sh: user.sh}}
+							)
+							res.send(user.sh);
+							db.close();
+						}
+						else {
+							//если не совпадают, то false
+							res.send(false);
+							db.close();
+						}
+					}
+				});
+				break;
 		}
 			//создание комнаты
 			case 2: {
-			var _players = {};
-			var _room;
-			//добавляем с комнату того, кто создал ее
-			//console.log(userSh);
-			db.collection("users").findOne({sh: userSh} , function(err, _user){
-				//проверяем, не играет ли человек == "*"
-				if (_user.whenPlaing  == "*") {
-					_players[1] = {name: _user.login,
-								  sh: _user.sh,
-								  color: "rgb(198, 144, 208)",
-								  position: 0,
-								  balanse: 15000,
-								  num: 1
-								  };
+				var _players = {};
+				var _room;
+				var _tables = []; //игровые поля
 
-					//создаем комнату с начальными параметрами
-					_room = {idr: md5(new Date()),
-							maxPlayers: maxPlayersIn,
-							players: _players,
-							isPlay: 0,
-							whoPlay: 1
-							};
+				//добавляем дефолтные таблички в данный объект
+				db.collection('monopolyTable').find().toArray(function(err, result){
+					_tables = result;
+				});
+				//добавляем с комнату того, кто создал ее
+				//console.log(userSh);
+				db.collection("users").findOne({sh: userSh} , function(err, _user){
+					//проверяем, не играет ли человек == "*"
+					if (_user.whenPlaing  == "*") {
+						_players[1] = {name: _user.login,
+									  sh: _user.sh,
+									  color: "rgb(198, 144, 208)",
+									  position: 0,
+									  balanse: 15000,
+									  num: 1
+									  };
 
-					//добавляем комнату в БД
-					db.collection("rooms").insertOne(_room, function(err, result) {
-						if(err) return res.status(400).send();
-					});
-					//в челике записать, что он играет
-					db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
-					console.log("**(?)** INFO:\t\tДобавлена комната: "+_room.idr);
-					addRoomGlobal(_room, _user.sh);
-					//так же говорим создателю, что он может удалить комнату
-					res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
-				}
-				db.close(); //закрываем коннект
-			});
-		
+						//создаем комнату с начальными параметрами
+						_room = {idr: md5(new Date()),
+								maxPlayers: maxPlayersIn,
+								players: _players,
+								tables: _tables,
+								isPlay: 0,
+								whoPlay: 1
+								};
+
+						//добавляем комнату в БД
+						db.collection("rooms").insertOne(_room, function(err, result) {
+							if(err) return res.status(400).send();
+						});
+						//в челике записать, что он играет
+						db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
+						console.log("**(?)** INFO:\t\tДобавлена комната: "+_room.idr);
+						addRoomGlobal(_room, _user.sh);
+						//так же говорим создателю, что он может удалить комнату
+						res.send(_room.idr); //ответ в виде объекта комнаты (потом только idr)
+					}
+					db.close(); //закрываем коннект
+				});
+				break;
 			}
 			//присоединение к комнате
 			case 3: {
@@ -238,15 +245,15 @@ app.post("/api/users", jsonParser, function (req, res) {
 													counter++;
 												}
 												if (counter >= _room.maxPlayers) {
-													//говорим, что комната играет
-													db.collection("rooms").findOneAndUpdate({idr: userIdr}, {$set: {isPlay: 1}});
+														//говорим, что комната играет
+														db.collection('rooms').findOneAndUpdate({idr: userIdr}, {$set: {isPlay: "1"}});
 														delRoomAndStartGlobal(_room);
 													} else {
 														//иначе обновляем данные в комнате
 														changeRoomGlobal(_room, _players[1].sh, userSh, _user.login);
 													}
 											});
-											db.close();
+											//db.close();
 									});
 
 
@@ -262,7 +269,6 @@ app.post("/api/users", jsonParser, function (req, res) {
 						res.send(false);
 						db.close();
 					}
-					//ищем массив с игроками
 				});
 				break;
 			} 
@@ -271,10 +277,12 @@ app.post("/api/users", jsonParser, function (req, res) {
 				//ищем комнаты, которые не играют
 				db.collection("users").findOne({sh: userSh}, function(err, _user) {
 					setTimeout(function() {
-						db.collection("rooms").find({}).toArray(
+						db.collection("rooms").find().toArray(
 							function(err, _rooms) {
-							for (var i=0; i<_rooms.length; i++) {
-								addRoomGlobal(_rooms[i], _rooms[i].players[1].sh, userSh, _user.login);
+								for (var i=0; i<_rooms.length; i++) {
+									if (parseFloat(_rooms.isPlay) == 0) {
+										addRoomGlobal(_rooms[i], _rooms[i].players[1].sh, userSh, _user.login);
+									}
 							}
 							//res.send(_rooms);
 							db.close();
@@ -477,10 +485,11 @@ webSocketServer.on('connection', function(ws) {
 									balanse: allPlayer[i].balanse
 								}
 							}
-							//отправляем данные о игроках при коннекте
+							//отправляем данные о игроках и таблички при коннекте
 							ws.send(JSON.stringify({'type':'createPlayer', 'data':{
 								players: _players,
-								maxPlayers: _room.maxPlayers
+								maxPlayers: _room.maxPlayers,
+								tables: _room.tables
 							}}));
 						} 
 						//если не нашлась комната
@@ -578,11 +587,9 @@ webSocketServer.on('connection', function(ws) {
 								//находим нужную комнату с пирами
 								if (peersInGame[i][0] == m['data'].idr) {
 									//перебираем всех игроков в комнате
-									console.log("ok 3");
 									for (var j=1; j<peersInGame[i].length; j++) {
 										//если нашли человека, который ходит сейчас
 										//ему показываем кнопку
-										console.log(peersInGame[i][j].sh);
 										if (peersInGame[i][j].sh == whoNowPlaySh) {
 											peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
 										} 
@@ -667,7 +674,7 @@ webSocketServer.on('connection', function(ws) {
 	deleteRoomGlobal = function deleteRoom(_idr) {
 		for (var i=0; i<peers.length; i++) {
 			//отсылаем им idr удаления
-			peers[i].ws.send(JSON.stringify({'type': 'deleteRoom','data': _idr}));
+			peers[i].ws.send(JSON.stringify({'type': 'deleteRoom', 'data': _idr}));
 		}
 		console.log("**(?)** INFO:\t\tУдалена комната: "+_idr);
 	}
@@ -688,7 +695,7 @@ webSocketServer.on('connection', function(ws) {
 		//удаляем у все эту комнату
 		for (var i=0; i<peers.length; i++) {
 			//отсылаем им idr удаления
-			peers[i].ws.send(JSON.stringify({'type': 'deleteRoom','data': _room.idr}));
+			peers[i].ws.send(JSON.stringify({'type': 'deleteRoom', 'data': _room.idr}));
 		}
 		var wsToDir = [];
 		
@@ -703,7 +710,7 @@ webSocketServer.on('connection', function(ws) {
 		}
 		
 		for (var i=0; i<wsToDir.length; i++) {
-			wsToDir[i].send(JSON.stringify({'type': 'redirectToGame','data': _room.idr}));
+			wsToDir[i].send(JSON.stringify({'type': 'redirectToGame', 'data': _room.idr}));
 		}
 		console.log('**(?)** INFO:\t\tСтарт игровой комнаты '+_room.idr);
 	}
