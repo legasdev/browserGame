@@ -20,7 +20,11 @@ function getCoords(elem){
 function createPlayers(_players,_maxPlayers){
 	// console.log(_players[0].color);
 	resize();
+<<<<<<< HEAD
 	// console.log(_players[0]);
+=======
+	console.log(_players[0]);
+>>>>>>> 6a3f1bfd200f5169d0d2ce0593e3991821ed9f27
 	var Pl=document.getElementById('empty');
 	input=_maxPlayers;
 	var filed=document.getElementsByClassName('filed-game')[0];
@@ -171,6 +175,7 @@ window.onload = function() {
 			//создает игроков в комнате
 			case 'createPlayer':
 				createPlayers(m['data'].players,m['data'].maxPlayers);
+<<<<<<< HEAD
 				//console.log(m['data'].tables);
 				// Меняем цвета в ячейках
 				var celssAround=document.getElementsByClassName('celssAround1');
@@ -178,6 +183,9 @@ window.onload = function() {
 					celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
 				}
 			break;
+=======
+				console.log(m['data'].tables);
+>>>>>>> 6a3f1bfd200f5169d0d2ce0593e3991821ed9f27
 			//обновление данных в комнате
 			case 'updateGameRoom':
 				// console.log(m['data']);

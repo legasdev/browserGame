@@ -280,7 +280,11 @@ app.post("/api/users", jsonParser, function (req, res) {
 						db.collection("rooms").find().toArray(
 							function(err, _rooms) {
 								for (var i=0; i<_rooms.length; i++) {
+<<<<<<< HEAD
 									if (parseFloat(_rooms[i].isPlay) == 0) {
+=======
+									if (parseFloat(_rooms.isPlay) == 0) {
+>>>>>>> 6a3f1bfd200f5169d0d2ce0593e3991821ed9f27
 										addRoomGlobal(_rooms[i], _rooms[i].players[1].sh, userSh, _user.login);
 									}
 							}
@@ -506,6 +510,7 @@ webSocketServer.on('connection', function(ws) {
 								}
 							}
 							//отправляем данные о игроках и таблички при коннекте
+<<<<<<< HEAD
 							ws.send(JSON.stringify({
 								type:'createPlayer', 
 								data:{
@@ -514,6 +519,13 @@ webSocketServer.on('connection', function(ws) {
 									tables: _room.tables
 								}
 							}));
+=======
+							ws.send(JSON.stringify({'type':'createPlayer', 'data':{
+								players: _players,
+								maxPlayers: _room.maxPlayers,
+								tables: _room.tables
+							}}));
+>>>>>>> 6a3f1bfd200f5169d0d2ce0593e3991821ed9f27
 						} 
 						//если не нашлась комната
 						else {
@@ -682,6 +694,7 @@ webSocketServer.on('connection', function(ws) {
 							db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: 1}});
 							whoMove=1;
 						}
+<<<<<<< HEAD
 						
 						//кто сейчас должен играть
 						var whoPlay = _room.players[whoMove];
@@ -697,6 +710,24 @@ webSocketServer.on('connection', function(ws) {
 										peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
 									} else {
 										peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
+=======
+						//ищем комнату, если игрок в комнате
+						if (m['data'].sh == whoNowPlaySh) {
+							for (var i=0; i<peersInGame.length; i++) {
+								//находим нужную комнату с пирами
+								if (peersInGame[i][0] == m['data'].idr) {
+									//перебираем всех игроков в комнате
+									for (var j=1; j<peersInGame[i].length; j++) {
+										//если нашли человека, который ходит сейчас
+										//ему показываем кнопку
+										if (peersInGame[i][j].sh == whoNowPlaySh) {
+											peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
+										} 
+										//иначе скрыть всем остальным
+										else {
+											peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
+										}
+>>>>>>> 6a3f1bfd200f5169d0d2ce0593e3991821ed9f27
 									}
 								}
 							}
