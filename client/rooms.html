@@ -27,7 +27,7 @@
 			var ws;
 			//соединяем
 			function connect() {
-				ws = new WebSocket('ws://127.0.0.1:443');
+				ws = new WebSocket('ws://25.52.102.108:443');
 				ws.onopen = onopen;
 				ws.onmessage = onmessage;
 				ws.onerror = onerror;
@@ -55,31 +55,45 @@
 					case 'updateRoom':	
 						//обновляем комнату
 						updateRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
-						break;
+					break;
+						
 					case 'addRoom': 
 						//добавляем комнату
 						addRoom(m['data'].idr, m['data'].maxPlayers, m['data'].players);
-						break;
+					break;
+						
 					case 'redirectToGame':
 						//отслыаем в комнату с игрой
 						redirectToGame(m['data']);
-						break;
+					break;
+						
 					case 'deleteRoom':
 						//удаляем комнату из списка
 						deleteRoom(m['data']);
-						break;
+					break;
+						
 					case 'canDelRoom':
 						//добавляем возможность удалить комнату
 						addDelRoomButton(m['data']);
-						break;
+					break;
+						
 					case 'canOutRoom':
 						//добавить кнопку выхода из комнаты
 						addLeaveButton(m['data'], m['name']);
-						break;
+					break;
+					
+					case 'addUrlToGame':
+						//добавляем кнопку перехода в игру
+						var elem = document.createElement('div');
+						elem.setAttribute('class', 'linkToGame');
+						elem.innerHTML = "<a href ='/playingField.html?idr="+m['data'].idr+"' >Перейти в игру</a>";
+						document.getElementById('body').appendChild(elem);
+					break;
+						
 					default:
 						//если непонятная команда
 						console.log("Ошибка запроса [Непонятный запрос].");
-						break;
+					break;
 				}
 			}
 				

@@ -7,7 +7,7 @@ var md5 = require("./md5");
 //* Смотрим БД *//
 var app = express();
 var jsonParser = bodyParser.json();
-var host = "localhost";
+var host = "25.52.102.108";
 var port = "27017";
 var bd = "usersdb";
 var appport = 80;
@@ -73,7 +73,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 				login: userLogin,  //логин
 				pass: userPass,   //пароль
 				sh: md5(md5(userLogin)+md5(nowData.toString())),  //сессия
-				whenPlaing: "*" //где сейчас играет, если не *, то играет
+				whenPlaying: "*" //где сейчас играет, если не *, то играет
 			   };
 	
     mongoClient.connect(url, function(err, db){
@@ -145,7 +145,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 				//console.log(userSh);
 				db.collection("users").findOne({sh: userSh} , function(err, _user){
 					//проверяем, не играет ли человек == "*"
-					if (_user.whenPlaing  == "*") {
+					if (_user.whenPlaying  == "*") {
 						_players[1] = {name: _user.login,
 									  sh: _user.sh,
 									  color: "rgb(198, 144, 208)",
@@ -168,7 +168,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 							if(err) return res.status(400).send();
 						});
 						//в челике записать, что он играет
-						db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: _room.idr}});
+						db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaying: _room.idr}});
 						console.log("**(?)** INFO:\t\tДобавлена комната: "+_room.idr);
 						addRoomGlobal(_room, _user.sh);
 						//так же говорим создателю, что он может удалить комнату
@@ -187,7 +187,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 					//получаем массив игроков
 					//console.log("2");
 					//смотрим, играет ли игрок сейчас == "*"
-					if (_user.whenPlaing  == "*") {
+					if (_user.whenPlaying  == "*") {
 						db.collection("rooms").findOne({idr: userIdr}, function(err, _room) {
 							if (_room != undefined) {
 								//если нашли человеека
@@ -234,7 +234,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 										{$set: {players: _players}}, function(err, __room) {
 											//при удачном добавлении вернуть true
 											//и в челике записать, что он играет
-											db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaing: userIdr}});
+											db.collection("users").findOneAndUpdate({sh: userSh}, {$set: {whenPlaying: userIdr}});
 											res.send(userIdr);	//отсылаем ссылку
 											//отправляем всем клиентам измененые данные
 											db.collection("rooms").findOne({idr: userIdr}, function(err, _room){
@@ -306,7 +306,7 @@ app.post("/api/users", jsonParser, function (req, res) {
 							//берем челика из комнаты и сверяем его sh
 							for (var i=1; i <= 10; i++) {
 								if (_players[i] != undefined) {
-									db.collection("users").findOneAndUpdate({sh: _players[i].sh}, {$set: {whenPlaing: '*'}});
+									db.collection("users").findOneAndUpdate({sh: _players[i].sh}, {$set: {whenPlaying: '*'}});
 								}
 							}
 							//удалить у клиентов со страницы
@@ -424,6 +424,19 @@ webSocketServer.on('connection', function(ws) {
 			//коннект к поиску игры
 			case 'connectToRoom':
 				peers.push({ws: ws, sh: m['data']}); //добавляем ссылку при коннекте
+				mongoClient.connect(url, function(err, db){
+					db.collection('users').findOne({sh: m['data']}, function(err, _user){
+						if (_user.whenPlaying != "*") {
+							ws.send(JSON.stringify({
+								type: 'addUrlToGame',
+								data: {
+									idr: _user.whenPlaying
+								}
+							}));
+						}
+					});
+				});
+				
 				console.log("**(?)** INFO:\t\tСоединение с "+m['data']+" установлено.");
 			break;
 			
@@ -591,7 +604,6 @@ webSocketServer.on('connection', function(ws) {
 						//нашли человека
 						var whoPlay = _room.players[_room.whoPlay];
 						if (whoPlay.sh == m['data'].sh) {
-							console.log(m['data'].sh);
 							//теперь выдадим игроку сообщение, в зависимости от позиции
 							for (var i=0; i<_room.tables.length; i++) {
 								//находим плашку в бд с нужной позицией
@@ -671,37 +683,36 @@ webSocketServer.on('connection', function(ws) {
 			//ответ на покупку ничей клетки
 			case 'getBuyAnswer':
 				//изменяем номер того, кто ходит
-				mongoClient.connect(url, function(err, db) {
-					db.collection('rooms').findOne({idr: m['data'].idr}, function (err, _room){
-						var whoMove = _room.whoPlay;
-						console.log(whoMove);
-						if (whoMove+1<=_room.maxPlayers) {
-							whoMove+=1;
-							db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: whoMove}});
-						} else {
-							db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: 1}});
-							whoMove=1;
-						}	
-						//кто сейчас должен играть
-						var whoPlay = _room.players[whoMove];
-						console.log(whoMove);
-						
-						//находим комнату
-						for (var i=0; i<peersInGame.length; i++) {
-							if (peersInGame[i][0] == m['data'].idr) {
-								//перебор игроков
-								for (var j=1; j<peersInGame[i].length; j++) {
-									//если чел ходит, то показать кнопку, остальным скрыть
-									if (peersInGame[i][j].sh == whoPlay.sh) {
-										peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
-									} else {
-										peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
+				setTimeout(function(){
+					mongoClient.connect(url, function(err, db) {
+						db.collection('rooms').findOne({idr: m['data'].idr}, function (err, _room){
+							var whoMove = _room.whoPlay;
+							if (whoMove+1<=_room.maxPlayers) {
+								db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: whoMove+1}});
+								whoMove+=1;
+							} else {
+								db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: 1}});
+								whoMove=1;
+							}	
+							//кто сейчас должен играть
+							var whoPlay = _room.players[whoMove];
+							//находим комнату
+							for (var i=0; i<peersInGame.length; i++) {
+								if (peersInGame[i][0] == m['data'].idr) {
+									//перебор игроков
+									for (var j=1; j<peersInGame[i].length; j++) {
+										//если чел ходит, то показать кнопку, остальным скрыть
+										if (peersInGame[i][j].sh == whoPlay.sh) {
+											peersInGame[i][j].ws.send(JSON.stringify({'type': 'showMoveBtn'}));
+										} else {
+											peersInGame[i][j].ws.send(JSON.stringify({'type': 'hideMoveBtn'}));
+										}
 									}
 								}
 							}
-						}
+						});
 					});
-				});
+				}, 200);
 			break;
 		}
 	 });

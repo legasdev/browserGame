@@ -1,3 +1,4 @@
+var ip = "25.52.102.108";
 var pos = {};
 // var players={};
 var player={};
@@ -141,7 +142,7 @@ window.onload = function() {
 	var ws;
 	//соединяем
 	function connect() {
-		ws = new WebSocket('ws://127.0.0.1:443');
+		ws = new WebSocket('ws://'+ip+':443');
 		ws.onopen = onopen;
 		ws.onmessage = onmessage;
 		ws.onerror = onerror;
