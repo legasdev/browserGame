@@ -7,7 +7,7 @@
 		<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Lato:300i" rel="stylesheet">
 		<link rel="stylesheet" href="css/listUsers.css">
-		 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		 <script src="js/jquery-2.2.4.min.js"></script>
 	</head>
 	<body id="body">
 		<div id="allRooms" class="button form-rooms">
@@ -27,7 +27,7 @@
 			var ws;
 			//соединяем
 			function connect() {
-				ws = new WebSocket('ws://25.52.102.108:443');
+				ws = new WebSocket('ws://localhost:443');
 				ws.onopen = onopen;
 				ws.onmessage = onmessage;
 				ws.onerror = onerror;

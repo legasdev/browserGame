@@ -7,7 +7,7 @@ var md5 = require("./md5");
 //* Смотрим БД *//
 var app = express();
 var jsonParser = bodyParser.json();
-var host = "25.52.102.108";
+var host = "localhost";
 var port = "27017";
 var bd = "usersdb";
 var appport = 80;
@@ -634,48 +634,6 @@ webSocketServer.on('connection', function(ws) {
 								}
 							}
 						}
-						//для начала найти позицию игрока в бд
-						/*for (var i=1; i<=_room.maxPlayers; i++) {
-							if (_room.players[i].sh == m['data'].sh && _room.players[i].num == parseFloat(_room.whoPlay)) {
-								//whoPlayPos = _room.players[i].position;
-								console.log(_room.whoPlay, i);
-								//есди этот номер играет
-								//теперь выдадим игроку сообщение, в зависимости от позиции
-								for (var j=0; j<_room.tables.length; j++) {
-									//находим плашку в бд с нужной позицией
-									if (_room.tables[j].num-1 == _room.players[i].position) {
-										//если имена совпадают, то говорим, что игрок на своей клетке
-										console.log(_room.tables[j].owner);
-										if (_room.tables[j].owner == _room.players[i].name) {
-											/////// НУЖНО СКАЗАТЬ
-										} else if (_room.tables[j].owner == 'none') {
-											//если никому не принадлежит, то предложить купить
-											for (var k=0; k<peersInGame.length; k++) {
-												if (peersInGame[k][0] == m['data'].idr) {
-													for (var t=1; t<peersInGame[k].length; t++) {
-														peersInGame[k][t].ws.send(JSON.stringify({
-															type: 'buyNotify',
-															data: {
-																price: _room.tables[j].price,
-																name: _room.tables[j].name
-															}
-														}));
-													}
-												}
-											}
-										} else {
-											//если клетка чья-то, то ищем человека и передаем деньги ему
-
-										}
-									}
-								}
-							}
-						}*/
-						//console.log(_room.tables[0]);
-						//пока что скрытие кнопок у всех и показ кнопки у следующего игрока
-						//определим, какой sh у игрока
-						//который ходит следующим
-						
 					});
 				});
 			break;
@@ -686,6 +644,30 @@ webSocketServer.on('connection', function(ws) {
 				setTimeout(function(){
 					mongoClient.connect(url, function(err, db) {
 						db.collection('rooms').findOne({idr: m['data'].idr}, function (err, _room){
+							
+							//проверяем ответ игрока на покупку
+							//если нажал да
+							if (m['data'].answer == 1) {
+								//проверяем деньги на его балансе
+								for (var i=1; i<=_room.maxPlayers; i++) {
+									if (_room.players[i].sh == m['data'].sh) {
+										//если денег останется больше или 0, то купить
+										if (_room.players[i].balanse - _room.tables[_room.players[i].position].price >= 0) {
+											//меняем баланс
+											_room.players[i].balanse -= _room.tables[_room.players[i].position].price;
+											db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {players: _room.players}});
+											//меняем состояние клетки
+											_room.tables[_room.players[i].position].owner = _room.players[i].name;
+											_room.tables[_room.players[i].position].colorOwner = _room.players[i].color;
+											db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {tables: _room.tables}});
+											//отправляем всем подключенным новые состояния
+											
+										}
+									}
+								}
+							}
+							
+							//изменяем водящего
 							var whoMove = _room.whoPlay;
 							if (whoMove+1<=_room.maxPlayers) {
 								db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {whoPlay: whoMove+1}});
@@ -713,6 +695,33 @@ webSocketServer.on('connection', function(ws) {
 						});
 					});
 				}, 200);
+			break;
+				
+			//ответ на новое сообщение
+			case 'newMessage':
+				//ищем комнату
+				mongoClient.connect(url, function(err, db) {
+					db.collection('users').findOne({sh: m['data'].sh}, function(err, _user){
+						for (var i=0; i<peersInGame.length; i++) {
+							if (peersInGame[i][0] == m['data'].idr) {
+								//отсылаем всем сообщение
+								//console.log(peersInGame[i]);
+								for (var j=1; j<peersInGame[i].length; j++) {
+									//если это не отправитель, то отсылаем
+									if (peersInGame[i][j].sh!=m['data'].sh) {
+										peersInGame[i][j].ws.send(JSON.stringify({
+											type: 'writeNewMessage',
+											data: {
+												text: m['data'].text,
+												whoWriter: _user.login
+											}
+										}));
+									}
+								}
+							}
+						}
+					});
+				});
 			break;
 		}
 	 });

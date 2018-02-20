@@ -1,4 +1,4 @@
-var ip = "25.52.102.108";
+var ip = "localhost";
 var pos = {};
 // var players={};
 var player={};
@@ -6,6 +6,7 @@ var avatars={};
 //var iter=0;
 var go;
 var completeAnimate;
+var win=document.getElementsByClassName('actionWindow')[0];
 
 function getCoords(elem){
 	var el=elem.getBoundingClientRect();
@@ -14,9 +15,10 @@ function getCoords(elem){
 		left:el.left + pageXOffset
 	};
 }
-	var ErrCoordsLeft=document.getElementsByClassName('main')[0].getBoundingClientRect().left;
-	var ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
-	var input;
+
+var ErrCoordsLeft=document.getElementsByClassName('main')[0].getBoundingClientRect().left;
+var ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
+var input;
 
 function createPlayers(_players,_maxPlayers){
 	// console.log(_players[0].color);
@@ -42,7 +44,7 @@ function createPlayers(_players,_maxPlayers){
 		pos["pl"+(i+1)] = 1;
 	}
 	//Создаём аватарки
-	console.log(_players.position);
+	console.log(_players[1]);
 	var startPosition;
 	var leftFiled=document.getElementsByClassName('filed-players')[0];
 
@@ -77,6 +79,7 @@ function createPlayers(_players,_maxPlayers){
 		}
 		leftFiled.appendChild(div);
 	}	
+
 	resize();
 	//Двигаем фишки на стартовые координаты аватарок
 		for(var i=0;i<input;i++){
@@ -134,7 +137,10 @@ var maxPlayers;
 var players = [];
 
 //все функции как глобальные переменные
-var __move, updatePlayers, getIdr, showMoveBtn, hideMoveBtn;
+var __move, updatePlayers, getIdr, showMoveBtn, hideMoveBtn, completeBuy, sendMessage;
+
+
+
 /*		
 	ЗАПУСК СЕРВЕРА НА КЛИЕНТЕ
 */
@@ -179,6 +185,7 @@ window.onload = function() {
 					celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
 				}
 			break;
+				
 			//обновление данных в комнате
 			case 'updateGameRoom':
 				// console.log(m['data']);
@@ -187,39 +194,46 @@ window.onload = function() {
 				maxPlayers = m['data'].maxPlayers;
 				players = m['data'].players;
 			break;
+				
 			//показываем возможность ходить
 			case 'showMoveBtn':
 				showMoveBtn();
 				//мы ходим
 				isPlay = true;
 			break;
+				
 			//скрытые кнопки хода
 			case 'hideMoveBtn':
 				hideMoveBtn();
 			break;
+				
 			//обновление игровых позиций
 			case 'update':
 				//console.log(m['data'].cube1, m['data'].cube2, m['data'].whoMove);
 				move(m['data'].whoMove, m['data'].cube1+m['data'].cube2)
 				hideMoveBtn();
 			break;
+				
 			//предложение о покупке
 			case 'buyNotify':
-				console.log("Купить "+m['data'].name+" за "+ m['data'].price+"?");
-				ws.send(JSON.stringify({
-					type: 'getBuyAnswer',
-					data: {
-						idr: getIdr()
-					}
-				}))
+				//console.log("Купить "+m['data'].name+" за "+ m['data'].price+"?");
+					
+				win.style.display='flex';
+				var textWindow=document.getElementsByClassName('textWindow')[0];
+				$(textWindow).html('"Купить "'+m['data'].name+'" за "'+ m['data'].price+'"?"');
 			break;
+				
+			//пишем новое сообщение в чате
+			case 'writeNewMessage':
+				addMsg(1, m['data'].text, m['data'].whoWriter);
+			break;
+				
 			default:
 				//если непонятная команда
 				console.log("Ошибка запроса [Непонятный запрос].");
 			break;
 		}
-	}
-				
+	}		
 	//при ошибке
 	function onerror(e) {
 		if (e) {
@@ -234,24 +248,6 @@ window.onload = function() {
 	}
 				
 	connect();
-			
-	//получаем комнату
-	/*$.ajax({
-		url: "api/users", //к юзерам
-		contentType: "application/json",
-		method: "POST",
-		data: JSON.stringify({
-			type: 6,
-			sh: sessionStorage.getItem('sh')
-		}),
-		success: function (answer) {
-			if (answer != false) {
-				for (var i=0; i<answer.length; i++) {
-				}
-			}
-		}
-	});*/
-
 	/* 
 		Второстепенные функции
 	*/
@@ -285,37 +281,20 @@ window.onload = function() {
 			}
 		}));
 	}
-	/*
-	//обновляет или создате фишки игроков
-	updatePlayers = function(numPlayers, _players){
-		//numPlayers сколько фишек создавать
-		//ищем общий блок, куда добавлять
-		var filed=document.getElementsByClassName('main')[0];
-		//циклом создаем
-		for(var i=0; i<numPlayers; i++) {
-			//узнаем размеры клетки, где расположен игрок
-			var _height = parseFloat($('#'+_players[i].pos).css("height"));
-			var _width = parseFloat($('#'+_players[i].pos).css('width'));
-			var a = $('#'+_players[i].pos).position();
-			//создаем новый блок, если его еще нет
-			if ($('#pl'+(i+1)).attr('class') == undefined) {
-				players[i] = document.createElement('div');
-				//добавляем ему новые аттрибуты
-				players[i].setAttribute('class','empty');
-				players[i].setAttribute('id', 'pl'+(i+1));
-				//раскрашиваем фишку в цвет
-				//добавляем на поле
-				filed.appendChild(players[i]);
+	
+	//отправляем ответ о покупке клетки
+	completeBuy = function(_answer) {
+		console.log(_answer);
+		ws.send(JSON.stringify({
+			type: 'getBuyAnswer',
+			data: {
+				idr: getIdr(),
+				sh: localStorage.getItem('sh'),
+				answer: _answer
 			}
-			//выставляем в позицию
-			$("#pl"+(i+1)).css({
-				left: a.left+(_width/(numPlayers+1))*(i+1), 
-				top: a.top+_height/(i%2==0?1.5:3), 
-				background: _players[i].color
-			});
-		}
-	}*/
-
+		}));
+	}
+	
 	//показываем табличку с кнопокой хода
 	showMoveBtn = function() {
 		$('#buttonMove').css('display', 'block');
@@ -325,35 +304,19 @@ window.onload = function() {
 	hideMoveBtn = function() {
 		$('#buttonMove').css('display', 'none');
 	}
-
-	// //функция хода
-	// move = function() {
-	// 	//отправляем на сервер инфу
-	// 	ws.send(JSON.stringify({
-	// 		'type': 'moveInGame',
-	// 		'data': {
-	// 			idr: getIdr(),
-	// 			sh: sessionStorage.getItem('sh')
-	// 		}
-	// 	}));
-	// }
 	
+	//отправка сообщения на сервер
+	sendMessage = function(_text) {
+		ws.send(JSON.stringify({
+			type: 'newMessage',
+			data: {
+				idr: getIdr(),
+				sh: localStorage.getItem('sh'),
+				text: _text
+			}
+		}));
+	}
 };
-
-function _move(arrow,target,duration=1){
-	var newSteps = 1;
-	console.log(pos.pl1);
-	newSteps = rand(1,6)+rand(1,6);
-	console.log(newSteps);
-	if (pos.pl1 + newSteps > 40) {
-		newSteps-=40-pos.pl1;
-		pos.pl1 = newSteps;
-	} else {
-		pos.pl1 += newSteps;
-	}	
-	var a=$("#"+pos.pl1.toString()).position();
-	$(arrow).animate({left: a.left, top: a.top},duration*1000);
-}
 
 // использование Math.round() даст неравномерное распределение!
 function rand(min, max)
@@ -366,7 +329,6 @@ var check = true;
 
 //изменение размера под экран
 var timerResize;
-		//fdf
 function resize() {
 
 	var empty=document.getElementsByClassName('empty');
@@ -382,38 +344,108 @@ function resize() {
 			$("#pl"+(i+1)).animate({left:getCoords(avatars[i]).left-player[i].getBoundingClientRect().width/2-ErrCoordsLeft,
 									top: getCoords(avatars[i]).top-player[i].getBoundingClientRect().height/2-ErrCoordsTop},1);
 		}
-	// var heightScreen = window.innerHeight;
-	// var widthScreen = window.innerWidth;
-	// console.log(parseFloat($('.main').css('width')));
-	// //var widthScreen = document.body.clientWidth;
-	// //$('#main').css({width: "100%", height: "100%"});
-	// if (800/500 < widthScreen/heightScreen) {
-	// 	$('.main').css('transform', 'scale('+heightScreen/500+')');
-	// 	$('.main').css('top', (heightScreen-500)/2);
-	// 	$('.main').css('left', (widthScreen-800)/2);
-	// } else {
-	// 	$('.main').css('transform', 'scale('+widthScreen/800+')');
-	// 	$('.main').css('top', (heightScreen-500)/2);
-	// 	$('.main').css('left', (widthScreen-800)/2);
-	// }
 }
 
 
-// //когда загрузилось
-// $(document).ready(function() {
-// 	resize();
-// 	resize();
-// });
-
 //меняем окно
 window.onresize = function() {
-	// clearTimeout(timerResize);
-	// timerResize = setTimeout(function(){
-		
-	// }, 1);
 	ErrCoordsLeft=document.getElementsByClassName('main')[0].getBoundingClientRect().left;
 	ErrCoordsTop=document.getElementsByClassName('main')[0].getBoundingClientRect().top;
 	resize();
-	//обновляем позиции игроков
-	// updatePlayers(maxPlayers, players);
 };
+
+var textArea=document.getElementsByClassName('textArea')[0];
+
+function addMsg(whoWriter, _text, _nameWriter){
+	chatLogs=document.getElementsByClassName('chatLogs')[0];
+	var ownMsg,classMsg;
+	var message = textArea.value;
+	
+	if(_text){
+		if (whoWriter==1) {
+			//Другой пишет
+			ownMsg="otherMsg";
+			classMsg="";
+		} else {
+			//Я пишу
+			ownMsg="myMsg";
+			classMsg="myMsgProp";
+		}
+		
+		$(chatLogs).html(chatLogs.innerHTML+'<div class="messageForm animated zoomInRight"><div class="'+ownMsg+'"><div class="messageLogo animated zoomIn '+classMsg+'"></div><div class="nameWriter">'+_nameWriter+'</div><div class="message">'+_text+'</div></div></div>');
+	}
+	//сдвигаем скролл в чате вниз при появлении новых сообщений
+	chatLogs.scrollTop=chatLogs.scrollHeight;
+	//удаляем классы с анимацией, чтобы при появлении новых сообщений
+	//анимировались только они
+	setTimeout(function() {
+		var lastChild=chatLogs.children[chatLogs.children.length-1];
+		lastChild.classList.remove('animated');
+		lastChild.classList.remove('zoomInRight');
+
+		var lastChildLogo=document.getElementsByClassName('messageLogo');
+		lastChildLogo[lastChildLogo.length-1].classList.remove('animated');
+		lastChildLogo[lastChildLogo.length-1].classList.remove('zoomIn');
+	}, 500);
+		
+};
+
+//очищаем textarea при Enter
+var button=document.getElementsByClassName('button')[0];
+button.onclick=function(){
+	sendMessage(textArea.value);
+	addMsg(0, textArea.value, 'me');
+	textArea.value="";
+	console.log('1');
+};
+
+textArea.onkeyup=function(event){
+	if(event.keyCode==13){
+		sendMessage(textArea.value);
+		addMsg(0, textArea.value, 'me');
+		this.value="";
+		console.log('2');
+	}
+};
+
+//Двигаем окно с сообщением
+win.onmousedown=function(event){
+	var btn=document.getElementsByClassName('btn');
+	if((event.target==btn[0])||(event.target==btn[1])){
+		this.style.display='none';
+		//покупка клетки
+		if (event.target==btn[0]) {
+			//если да
+			completeBuy(1);
+		} else {
+			//если нет
+			completeBuy(0);
+		}
+	} else {
+		var coords=getCoords(win);
+		var shiftX=event.pageX-coords.left;
+		var shiftY=event.pageY-coords.top;
+
+		win.style.position="absolute";
+		document.body.appendChild(win);
+		moveAt(event);
+
+		win.style.zIndex= 100;
+
+		function moveAt(event){
+			win.style.left=event.pageX-shiftX+'px';
+			win.style.top=event.pageY-shiftY+'px';
+		}
+		document.onmousemove=function(event){
+			moveAt(event);
+		}
+		win.onmouseup=function(){
+			document.onmousemove=null;
+			win.onmouseup=null;
+		}
+	}
+};
+win.ondragstart=function(){
+	return false;
+}
+
