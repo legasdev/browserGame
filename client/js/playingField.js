@@ -177,7 +177,7 @@ window.onload = function() {
 		switch (m['type']) {
 			//создает игроков в комнате
 			case 'createPlayer':
-				createPlayers(m['data'].players,m['data'].maxPlayers);
+				createPlayers(m['data'].players, m['data'].maxPlayers);
 				//console.log(m['data'].tables);
 				// Меняем цвета в ячейках
 				var celssAround=document.getElementsByClassName('celssAround1');
@@ -188,11 +188,8 @@ window.onload = function() {
 				
 			//обновление данных в комнате
 			case 'updateGameRoom':
-				// console.log(m['data']);
-				//создаем игроков
-				//updatePlayers(m['data'].maxPlayers, m['data'].players);
-				maxPlayers = m['data'].maxPlayers;
-				players = m['data'].players;
+				console.log(m['data'].players, m['data'].tables, m['data'].maxPlayers);
+				//обновляем игроков
 			break;
 				
 			//показываем возможность ходить

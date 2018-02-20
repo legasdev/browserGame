@@ -661,7 +661,26 @@ webSocketServer.on('connection', function(ws) {
 											_room.tables[_room.players[i].position].colorOwner = _room.players[i].color;
 											db.collection('rooms').findOneAndUpdate({idr: m['data'].idr}, {$set: {tables: _room.tables}});
 											//отправляем всем подключенным новые состояния
-											
+											var _players = _room.players;
+											for (var j=1; j<=_room.maxPlayers; j++) {
+												delete _players[j].sh;
+												delete _players[j].num;
+											}
+											for (var j=0; j<peersInGame.length; j++) {
+												if (peersInGame[j][0] == m['data'].idr) {
+													for (var k=1; k<peersInGame[j].length; k++) {
+														//отправляем данные о игроках и таблички при изменении данных
+														peersInGame[j][k].ws.send(JSON.stringify({
+															type: 'updateGameRoom', 
+															data:{
+																players: _players,
+																maxPlayers: _room.maxPlayers,
+																tables: _room.tables
+															}
+														}));
+													}
+												}
+											}
 										}
 									}
 								}
