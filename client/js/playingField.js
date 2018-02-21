@@ -6,7 +6,7 @@ var avatars={};
 //var iter=0;
 var go;
 var completeAnimate;
-var win=document.getElementsByClassName('actionWindow')[0];
+var win;
 
 function getCoords(elem){
 	var el=elem.getBoundingClientRect();
@@ -44,7 +44,7 @@ function createPlayers(_players,_maxPlayers){
 		pos["pl"+(i+1)] = 1;
 	}
 	//Создаём аватарки
-	console.log(_players[1]);
+	//console.log(_players[1]);
 	var startPosition;
 	var leftFiled=document.getElementsByClassName('filed-players')[0];
 
@@ -61,10 +61,10 @@ function createPlayers(_players,_maxPlayers){
 		name=document.createElement('div');
 		money=document.createElement('div');
 		//добавляем классы в дивы
-			div.classList.add('infoPlayer');
-			face.classList.add('face');
-			money.classList.add('money');
-			name.classList.add('name');
+		div.classList.add('infoPlayer');
+		face.classList.add('face');
+		money.classList.add('money');
+		name.classList.add('name');
 
 		div.style.backgroundColor=_players[i].color;
 
@@ -180,16 +180,31 @@ window.onload = function() {
 				createPlayers(m['data'].players, m['data'].maxPlayers);
 				//console.log(m['data'].tables);
 				// Меняем цвета в ячейках
-				var celssAround=document.getElementsByClassName('celssAround1');
+				//var celssAround=document.getElementsByClassName('celssAround1');
 				for(var i=0;i<m['data'].tables.length;i++) {
-					celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
+					
+					$('#'+(i+1)).attr('style', 'background-color:'+m['data'].tables[i].colorOwner);
+					//$('#'+(i+1)).html(m['data'].tables[i].name);
+					//celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
 				}
 			break;
 				
 			//обновление данных в комнате
 			case 'updateGameRoom':
-				console.log(m['data'].players, m['data'].tables, m['data'].maxPlayers);
+				//console.log(m['data'].players, m['data'].tables, m['data'].maxPlayers);
+				// Меняем цвета в ячейках
+				//var celssAround=document.getElementsByClassName('celssAround1');
+				for(var i=0;i<m['data'].tables.length;i++) {
+					
+					$('#'+(i+1)).attr('style', 'background-color:'+m['data'].tables[i].colorOwner);
+					//$('#'+(i+1)).html(m['data'].tables[i].name);
+					  //celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
+				}
 				//обновляем игроков
+				var money = document.getElementsByClassName('money');
+				for (var i=1; i<=m['data'].maxPlayers; i++) {
+					money[i-1].innerHTML = m['data'].players[i].balanse;
+				}
 			break;
 				
 			//показываем возможность ходить
@@ -214,7 +229,14 @@ window.onload = function() {
 			//предложение о покупке
 			case 'buyNotify':
 				//console.log("Купить "+m['data'].name+" за "+ m['data'].price+"?");
-					
+				createNotify("Купить "+m['data'].name+" за "+ m['data'].price+"?", "Да", "Нет");
+				//win.style.display='flex';
+				//var textWindow=document.getElementsByClassName('textWindow')[0];
+				//$(textWindow).html('"Купить "'+m['data'].name+'" за "'+ m['data'].price+'"?"');
+			break;
+			
+			//оплата аренды другому игроку
+			case 'rentNotify':
 				win.style.display='flex';
 				var textWindow=document.getElementsByClassName('textWindow')[0];
 				$(textWindow).html('"Купить "'+m['data'].name+'" за "'+ m['data'].price+'"?"');
@@ -315,6 +337,26 @@ window.onload = function() {
 	}
 };
 
+//создаем всплывающее сообщение
+function createNotify(_text="", _yesBtn="", _noBtn="") {
+	var str = "";
+	//формируем сообщение
+	if (_noBtn!="") {
+		str = '<div class="textWindow">'+_text+'</div><div class="actionButton"><div class="yesBtn btn" onclick="tapToYesBtn()">'+_yesBtn+'</div><div class="noBtn btn">'+_noBtn+'</div></div>';
+	} else {
+		str = '<div class="textWindow">'+_text+'</div><div class="actionButton"><div class="yesBtn btn">'+_yesBtn+'</div></div>';
+	}
+	//добавляем кнопку перехода в игру
+	var elem = document.createElement('div');
+	elem.setAttribute('class', 'actionWindow');
+	elem.innerHTML = str;
+	//document.getElementsByClassName('filed-center')[0].appendChild(elem);
+	document.getElementById('full').appendChild(elem);
+	win = document.getElementsByClassName('actionWindow')[0];
+	//win.style.display='flex';
+	$('.actionWindow').draggable();
+}
+
 // использование Math.round() даст неравномерное распределение!
 function rand(min, max)
 {
@@ -393,7 +435,6 @@ button.onclick=function(){
 	sendMessage(textArea.value);
 	addMsg(0, textArea.value, 'me');
 	textArea.value="";
-	console.log('1');
 };
 
 textArea.onkeyup=function(event){
@@ -401,48 +442,52 @@ textArea.onkeyup=function(event){
 		sendMessage(textArea.value);
 		addMsg(0, textArea.value, 'me');
 		this.value="";
-		console.log('2');
 	}
 };
 
 //Двигаем окно с сообщением
-win.onmousedown=function(event){
-	var btn=document.getElementsByClassName('btn');
-	if((event.target==btn[0])||(event.target==btn[1])){
-		this.style.display='none';
-		//покупка клетки
-		if (event.target==btn[0]) {
-			//если да
-			completeBuy(1);
+/*
+if (win) {
+	win.onmousedown=function(event){
+		var btn=document.getElementsByClassName('btn');
+		if((event.target==btn[0])||(event.target==btn[1])){
+			this.style.display='none';
+			//покупка клетки
+			if (event.target==btn[0]) {
+				//если да
+				completeBuy(1);
+			} else {
+				//если нет
+				completeBuy(0);
+			}
 		} else {
-			//если нет
-			completeBuy(0);
-		}
-	} else {
-		var coords=getCoords(win);
-		var shiftX=event.pageX-coords.left;
-		var shiftY=event.pageY-coords.top;
+			var coords=getCoords(win);
+			var shiftX=event.pageX-coords.left;
+			var shiftY=event.pageY-coords.top;
 
-		win.style.position="absolute";
-		document.body.appendChild(win);
-		moveAt(event);
-
-		win.style.zIndex= 100;
-
-		function moveAt(event){
-			win.style.left=event.pageX-shiftX+'px';
-			win.style.top=event.pageY-shiftY+'px';
-		}
-		document.onmousemove=function(event){
+			win.style.position="absolute";
+			document.body.appendChild(win);
 			moveAt(event);
+
+			win.style.zIndex= 100;
+
+			function moveAt(event){
+				win.style.left=event.pageX-shiftX+'px';
+				win.style.top=event.pageY-shiftY+'px';
+			}
+			document.onmousemove=function(event){
+				moveAt(event);
+			}
+			win.onmouseup=function(){
+				document.onmousemove=null;
+				win.onmouseup=null;
+			}
 		}
-		win.onmouseup=function(){
-			document.onmousemove=null;
-			win.onmouseup=null;
-		}
-	}
-};
-win.ondragstart=function(){
-	return false;
+	};
+
+	win.ondragstart=function(){
+		return false;
 }
 
+}
+*/

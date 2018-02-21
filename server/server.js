@@ -630,6 +630,21 @@ webSocketServer.on('connection', function(ws) {
 										}
 									} else {
 										//если клетка чья-то, то ищем человека и передаем деньги ему
+										for (var k=0; k<peersInGame.length; k++) {
+											if (peersInGame[k][0] == m['data'].idr) {
+												for (var t=1; t<peersInGame[k].length; t++) {
+													if (peersInGame[k][t].sh == whoPlay.sh) {
+														peersInGame[k][t].ws.send(JSON.stringify({
+															type: 'buyNotify',
+															data: {
+																price: _room.tables[i].price,
+																name: _room.tables[i].name
+															}
+														}));
+													}
+												}
+											}
+										}
 									}
 								}
 							}
@@ -685,7 +700,9 @@ webSocketServer.on('connection', function(ws) {
 									}
 								}
 							}
-							
+						});
+						
+						db.collection('rooms').findOne({idr: m['data'].idr}, function(err, _room){
 							//изменяем водящего
 							var whoMove = _room.whoPlay;
 							if (whoMove+1<=_room.maxPlayers) {

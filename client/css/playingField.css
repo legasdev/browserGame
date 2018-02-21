@@ -670,7 +670,7 @@ div .face
 
     display: -webkit-box;
     display: -ms-flexbox;
-    display: none;
+   /*display: none;*/
         flex-direction: column;
 
     width: 28vw;
