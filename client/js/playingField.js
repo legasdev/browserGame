@@ -139,8 +139,6 @@ var players = [];
 //все функции как глобальные переменные
 var __move, updatePlayers, getIdr, showMoveBtn, hideMoveBtn, completeBuy, sendMessage;
 
-
-
 /*		
 	ЗАПУСК СЕРВЕРА НА КЛИЕНТЕ
 */
@@ -229,7 +227,7 @@ window.onload = function() {
 			//предложение о покупке
 			case 'buyNotify':
 				//console.log("Купить "+m['data'].name+" за "+ m['data'].price+"?");
-				createNotify("Купить "+m['data'].name+" за "+ m['data'].price+"?", "Да", "Нет");
+				createNotify("buy", "Купить "+m['data'].name+" за "+ m['data'].price+"?", "Да", "Нет");
 				//win.style.display='flex';
 				//var textWindow=document.getElementsByClassName('textWindow')[0];
 				//$(textWindow).html('"Купить "'+m['data'].name+'" за "'+ m['data'].price+'"?"');
@@ -303,7 +301,7 @@ window.onload = function() {
 	
 	//отправляем ответ о покупке клетки
 	completeBuy = function(_answer) {
-		console.log(_answer);
+		$('.actionWindow').remove();
 		ws.send(JSON.stringify({
 			type: 'getBuyAnswer',
 			data: {
@@ -338,23 +336,33 @@ window.onload = function() {
 };
 
 //создаем всплывающее сообщение
-function createNotify(_text="", _yesBtn="", _noBtn="") {
-	var str = "";
-	//формируем сообщение
-	if (_noBtn!="") {
-		str = '<div class="textWindow">'+_text+'</div><div class="actionButton"><div class="yesBtn btn" onclick="tapToYesBtn()">'+_yesBtn+'</div><div class="noBtn btn">'+_noBtn+'</div></div>';
-	} else {
-		str = '<div class="textWindow">'+_text+'</div><div class="actionButton"><div class="yesBtn btn">'+_yesBtn+'</div></div>';
-	}
-	//добавляем кнопку перехода в игру
+function createNotify(_type="", _text="", _yesBtn="", _noBtn="") {
+	var str = '<div class="textWindow">'+_text+'</div>';
+	//добавляем инфобар
 	var elem = document.createElement('div');
 	elem.setAttribute('class', 'actionWindow');
-	elem.innerHTML = str;
-	//document.getElementsByClassName('filed-center')[0].appendChild(elem);
 	document.getElementById('full').appendChild(elem);
-	win = document.getElementsByClassName('actionWindow')[0];
-	//win.style.display='flex';
 	$('.actionWindow').draggable();
+	
+	switch (_type) {
+			
+		//покупка клетки
+		case 'buy':
+			str += '<div class="actionButton"><div class="yesBtn btn" onclick="completeBuy(1);">'+_yesBtn+'</div><div class="noBtn btn" onclick="completeBuy(0);">'+_noBtn+'</div></div>';
+			elem.innerHTML = str;
+		break;
+		
+		//выплата аренды
+		case 'rent':
+			str += '<div class="actionButton"><div class="yesBtn btn" onclick="completeBuy(1);">'+_yesBtn+'</div></div>';
+			elem.innerHTML = str;
+		break;
+		
+		default:
+			//если тип неопределен, то удалить окно
+			$('.actionWindow').remove();
+		break;
+	}
 }
 
 // использование Math.round() даст неравномерное распределение!
