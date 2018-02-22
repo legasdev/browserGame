@@ -180,8 +180,9 @@ window.onload = function() {
 				// Меняем цвета в ячейках
 				//var celssAround=document.getElementsByClassName('celssAround1');
 				for(var i=0;i<m['data'].tables.length;i++) {
-					
+					console.log();
 					$('#'+(i+1)).attr('style', 'background-color:'+m['data'].tables[i].colorOwner);
+					$('#'+(i+1)).attr('style', 'background-image: url('+m['data'].tables[i].img+')');
 					//$('#'+(i+1)).html(m['data'].tables[i].name);
 					//celssAround[i].style.backgroundColor=m['data'].tables[i].colorOwner;
 				}
@@ -310,6 +311,10 @@ window.onload = function() {
 				answer: _answer
 			}
 		}));
+	}
+	
+	completeRent = function() {
+		
 	}
 	
 	//показываем табличку с кнопокой хода
