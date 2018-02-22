@@ -48,7 +48,7 @@ function createPlayers(_players,_maxPlayers){
 	var startPosition;
 	var leftFiled=document.getElementsByClassName('filed-players')[0];
 
-	var div,money,face,name;
+	var div,money,face,name,menu,close;
 	for(var i=0;i<input;i++){
 		avatars[i] = document.createElement('div');
 		avatars[i].setAttribute('class','avatar');
@@ -60,11 +60,15 @@ function createPlayers(_players,_maxPlayers){
 		face=document.createElement('div');
 		name=document.createElement('div');
 		money=document.createElement('div');
+		menu=document.createElement('div');
+		close=document.createElement('span');
 		//добавляем классы в дивы
 		div.classList.add('infoPlayer');
 		face.classList.add('face');
 		money.classList.add('money');
 		name.classList.add('name');
+		menu.classList.add('menu');
+		close.classList.add('close');
 
 		div.style.backgroundColor=_players[i].color;
 
@@ -72,7 +76,9 @@ function createPlayers(_players,_maxPlayers){
 		div.insertBefore(face,div.firstChild);
 		div.appendChild(name);
 		div.appendChild(money);
-
+		div.appendChild(menu);
+		menu.appendChild(close);
+		close.innerHTML="&times";
 		money.innerHTML=_players[i].balanse;
 		if(input>5){
 			div.style.width="50%";

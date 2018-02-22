@@ -41,7 +41,6 @@ body
     background:         linear-gradient(to bottom, #d9c7b8 0%, #d9c7b8 100%);
     background-repeat: no-repeat;
 
-
     -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
@@ -54,8 +53,8 @@ body
 {
     position: relative;
 
-    width: 70vw;
-    height: 50vw;
+    width: 72vw;
+    height: 47vw;
 
     border: 1px solid #000;
 }
@@ -65,14 +64,18 @@ body
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    
-
 }
 .celssAround1
 {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
+
+    width: 100%;
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
 
     -ms-flex-wrap: wrap;
         flex-wrap: wrap;
@@ -81,10 +84,6 @@ body
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
-    width: 100%;
 }
 .celssAround2
 {
@@ -95,9 +94,7 @@ body
     border-top: 1px solid #000;
     border-right: 1px solid #000;
 }
-.filed-left .celss:nth-child(11) .celssAround1,
-.filed-right .celss:nth-child(11) .celssAround1,
-.filed-right .celss:nth-child(1) .celssAround1,
+
 .filed-left .celss:nth-child(1) .celssAround1
 {
     width: 100%;
@@ -176,7 +173,6 @@ body
 {
     border-bottom: 1px solid #000;
     border-left: 1px solid #000;
-
 }
 .filed-top .celss .celssAround1
 {
@@ -424,8 +420,6 @@ body
     width: 100%;
     min-width: 50%;
     min-height: 20%;
-
-    border: 0 solid #000;
 }
 .infoPlayer
 {
@@ -463,6 +457,37 @@ body
     -ms-flex-align: stretch;
     align-items: stretch;
 }
+div .menu
+{
+    position: absolute;
+    right: 1%;
+    top: 1%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+    width: 9%;
+    min-width: 0;
+    height: 20%;
+    min-height: 0;
+
+    border: 1px solid #000;
+    border-radius: 5px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    background-size: contain;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: stretch;
+}
+div .menu .close{
+    position: relative;
+    font-size: 2vw;
+}
 div .face
 {
     position: relative;
@@ -471,15 +496,12 @@ div .face
     display: -ms-flexbox;
     display: flex;
 
-    min-width: 1%;
-    min-height: 1%;
-
     border: 1px solid #000;
     border-radius: 100%;
-
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
+    /*    background-image: url(../image/apple.png);*/
 
     -webkit-box-pack: center;
     -ms-flex-pack: center;
@@ -500,6 +522,7 @@ div .face
     -ms-flex-align: stretch;
     align-items: stretch;
 }
+
 .empty
 {
     font-size: 1.5vw;
@@ -521,6 +544,11 @@ div .face
 #buttonMove
 {
     z-index: 1;
+    font-size: 1.8vw;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    vertical-align: top;
 }
 .chat
 {
@@ -542,9 +570,10 @@ div .face
     -webkit-box-direction: reverse;
     -ms-flex-direction: column-reverse;
 }
-.animated{
-    -webkit-animation-duration: 0.4s;
-            animation-duration: 0.4s;
+.animated
+{
+    -webkit-animation-duration: .4s;
+            animation-duration: .4s;
 }
 .chatForm
 {
@@ -557,6 +586,7 @@ div .face
     padding: 1%;
 
     border-top: 1px solid #000;
+
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
     -ms-flex-direction: row;
@@ -582,9 +612,9 @@ div .face
     display: block;
 
     margin: 2% 5%;
+
     border: 1px solid green;
     border-radius: 15px;
-
 }
 .messageForm:nth-child(1)
 {
@@ -597,10 +627,11 @@ div .face
     display: flex;
         flex-direction: row-reverse;
 
+    width: 85%;
+
     -webkit-box-orient: horizontal;
     -webkit-box-direction: reverse;
     -ms-flex-direction: row-reverse;
-    width: 85%;
 }
 .myMsgProp
 {
@@ -614,10 +645,11 @@ div .face
     display: flex;
         flex-direction: row;
 
+    width: 85%;
+
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
     -ms-flex-direction: row;
-    width: 85%;
 }
 .messageLogo
 {
@@ -632,13 +664,18 @@ div .face
     background: yellow;
 }
 .message
-{   position: relative;
+{
+    position: relative;
+
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    overflow-wrap: break-word;
-    word-break: break-word;
+
     padding: 18% 6% 6% 6%;
+
+    word-break: break-word;
+
+    overflow-wrap: break-word;
 }
 .button
 {
@@ -662,21 +699,23 @@ div .face
 }
 .textArea
 {
-    text-decoration: none;
+    overflow: none;
+
     width: 70%;
     padding: 1% 1% 1% 4%;
-    outline:none;
+
     resize: none;
-    overflow: none;
+    text-decoration: none;
+
+    outline: none;
 }
 .actionWindow
 {
     position: absolute;
-   
 
     display: -webkit-box;
     display: -ms-flexbox;
-   /*display: none;*/
+    /*display: none;*/
         flex-direction: column;
 
     width: 28vw;
@@ -739,6 +778,7 @@ div .face
     -ms-flex-align: center;
     align-items: center;
 }
-.btn:hover{
+.btn:hover
+{
     background: #aaa;
 }
