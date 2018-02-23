@@ -576,7 +576,7 @@ div .face
     display: flex;
     overflow: auto;
         flex-direction: column;
-
+    overflow-x:hidden;
     height: 93%;
 
     -webkit-box-orient: vertical;
@@ -707,9 +707,10 @@ div .face
     font-family: 'Cuprum', sans-serif;
     width: 28vw;
     height: 19vw;
-
+    -webkit-box-shadow: 1px 0px 5px 0px #8C7B74;
+            box-shadow: 1px 0px 5px 0px #8C7B74;
     border: 1px solid #000;
-    background: #aaa;
+    background: #BFAFA2;
 
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
@@ -756,8 +757,8 @@ div .face
     margin: 5%;
 
     border: 1px solid #000;
-    background: #aba;
-
+    background: #8C7B74;
+    color: #D9C7B8;
     -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
@@ -874,7 +875,7 @@ ul li{
 /* Track */
 ::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    border-radius: 2px;
+    border-radius: 2px;  
 }
  
 /* Handle */
