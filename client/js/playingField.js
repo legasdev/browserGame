@@ -60,15 +60,15 @@ function createPlayers(_players,_maxPlayers){
 		face=document.createElement('div');
 		name=document.createElement('div');
 		money=document.createElement('div');
-		menu=document.createElement('div');
-		close=document.createElement('span');
+		// menu=document.createElement('div');
+		// close=document.createElement('span');
 		//добавляем классы в дивы
 		div.classList.add('infoPlayer');
 		face.classList.add('face');
 		money.classList.add('money');
 		name.classList.add('name');
-		menu.classList.add('menu');
-		close.classList.add('close');
+		// menu.classList.add('menu');
+		// close.classList.add('close');
 
 		div.style.backgroundColor=_players[i].color;
 
@@ -76,16 +76,16 @@ function createPlayers(_players,_maxPlayers){
 		div.insertBefore(face,div.firstChild);
 		div.appendChild(name);
 		div.appendChild(money);
-		div.appendChild(menu);
-		menu.appendChild(close);
-		close.innerHTML="&times";
+		
+
+		// close.innerHTML="&times";
 		money.innerHTML=_players[i].balanse;
 		if(input>5){
 			div.style.width="50%";
 		}
-		leftFiled.appendChild(div);
-	}	
 
+		leftFiled.appendChild(div);
+	}
 	resize();
 	//Двигаем фишки на стартовые координаты аватарок
 		for(var i=0;i<input;i++){
@@ -433,7 +433,9 @@ function addMsg(whoWriter, _text, _nameWriter){
 		$(chatLogs).html(chatLogs.innerHTML+'<div class="messageForm animated zoomInRight"><div class="'+ownMsg+'"><div class="messageLogo animated zoomIn '+classMsg+'"></div><div class="nameWriter">'+_nameWriter+'</div><div class="message">'+_text+'</div></div></div>');
 	}
 	//сдвигаем скролл в чате вниз при появлении новых сообщений
-	chatLogs.scrollTop=chatLogs.scrollHeight;
+		$(chatLogs).animate({
+			scrollTop: chatLogs.scrollHeight},1000);
+		// chatLogs.scrollTop=chatLogs.scrollHeight;
 	//удаляем классы с анимацией, чтобы при появлении новых сообщений
 	//анимировались только они
 	setTimeout(function() {
