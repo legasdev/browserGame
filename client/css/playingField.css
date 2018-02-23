@@ -589,8 +589,10 @@ div .face
 
     margin: 2% 5%;
 
-    border: 1px solid green;
-    border-radius: 15px;
+    border: 1px solid #8C7B74;
+    border-radius: 5px;
+    -webkit-box-shadow: 1px 1px 1px 1px #8C7B74;
+            box-shadow: 1px 0px 10px 0px #8C7B74;
 }
 .messageForm:nth-child(1)
 {
